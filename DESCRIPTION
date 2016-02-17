@@ -1,8 +1,8 @@
 Package: SSDM
 Type: Package
 Title: Stacked Species Distribution Modelling
-Version: 0.1.0
-Date: 2016-02-12
+Version: 0.1.1
+Date: 2016-02-17
 Author: Sylvain Schmitt, Robin Pouteau, Dimitri Justeau, Philippe Birnbaum
 Maintainer: Sylvain Schmitt <sylvain.schmitt@agroparistech.fr>
 Description: Allows to map species richness and endemism based on stacked
@@ -30,6 +30,6 @@ Collate: 'Algorithm.SDM.R' 'Ensemble.SDM.R' 'Env.R' 'Occurrences.R'
         'load_occ.R' 'load_var.R' 'plot.model.R' 'save.model.R'
         'stack_modelling.R' 'stacking.R' 'update.stack.R' 'zzz.R'
 NeedsCompilation: no
-Packaged: 2016-02-11 21:56:31 UTC; amap
+Packaged: 2016-02-17 03:20:42 UTC; amap
 Repository: CRAN
-Date/Publication: 2016-02-12 00:55:58
+Date/Publication: 2016-02-17 09:00:40

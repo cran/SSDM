@@ -1,7 +1,7 @@
-dd1fb4a8ce0e38385975f10ecab4fabe *DESCRIPTION
+e8cdba3eb8f4770424dddbf5ec68b36e *DESCRIPTION
 7c4cd6e88503942dd624983276ada27d *LICENSE
 8089fa723114e758f621992c742d004e *NAMESPACE
-31e5810805876a32e10b4654108ecacc *NEWS
+1c17eb88c25e550c2fc55c835bb365d4 *NEWS
 e7c83dd0e2c4dd8855ca78df7b4ad8a7 *R/Algorithm.SDM.R
 fc376d1cb9d8923e39d46a8cc254e369 *R/Ensemble.SDM.R
 2191680c301347cf026773ac8d412ef1 *R/Env.R
@@ -16,7 +16,7 @@ eda2ff1385e5ecda6bf8a1ea19c8e942 *R/load_model.R
 cfc41767dfd7db4e62b587ea5e7f9af6 *R/load_occ.R
 c0c1aec9fb59989faf2e0a913fcb2491 *R/load_var.R
 06ddda106376567c91cbfbe52dfc53e4 *R/modelling.R
-fb2d614158cba4f4b26415ffe7717e2a *R/plot.model.R
+a5cde4a2925542b5f4e806c2fbb59114 *R/plot.model.R
 b9ceafbc2f901e361fbef8709763495d *R/save.model.R
 95207477f8eacaebac09ab9d46132cb1 *R/stack_modelling.R
 19e3be857e8f66028c17f317baaafafa *R/stacking.R
