@@ -1,5 +1,0 @@
-SSDM 0.1.1
-  Bug in plot.model function responsible for the absence of species in ESDM drop down menu for SSDM result plot fixed
-
-SSDM 0.1.0
-  Initial private beta release!

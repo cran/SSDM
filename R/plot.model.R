@@ -35,8 +35,8 @@ NULL
 #' @export
 setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
   choices = list()
-  for (i in 1:length(x@enms)) {choices[[i]] = strsplit(x@enms[[i]]@name, '.', fixed = T)[[1]][1]}
-  if (inherits(x@enms[[1]], 'Algorithm.SDM')) {full = F} else {full = T}
+  for (i in seq_len(length(x@enms))) {choices[[i]] = strsplit(x@enms[[i]]@name, '.Ensemble.SDM', fixed = TRUE)[[1]][1]}
+  if (inherits(x@enms[[1]], 'Algorithm.SDM')) {full = FALSE} else {full = TRUE}
 
   ui <- dashboardPage(
     dashboardHeader(title = x@name, titleWidth = 450),
@@ -57,7 +57,7 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
                          tabPanel( actionButton('unzoom', 'unzoom', icon = icon('search-minus'), width = NULL, ...),
                                    plotOutput('Diversity', dblclick = "plot1_dblclick", brush = brushOpts(id = "plot1_brush", resetOnNew = TRUE)),
                                    textOutput('diversity.info'),
-                                   title = 'Local specie richness'),
+                                   title = 'Local species richness'),
                          tabPanel(plotOutput('endemism'), title = 'Endemism map', textOutput('endemism.info')),
                          tabPanel(plotOutput('uncertainty'), title = 'Uncertainty'),
                          tabPanel(tableOutput('summary'), title = 'Summary')
@@ -147,16 +147,10 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
       ranges$x <- NULL
       ranges$y <- NULL
     })
-    eval = 'Mean'
-    ensemble.metric = strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1]
-    for (i in 1:length(ensemble.metric)) {
-      eval = paste(eval, paste(ensemble.metric[i],':',round(x@evaluation[1,which(names(x@evaluation) == ensemble.metric[i])], digits = 3)))
-      if (i < length(ensemble.metric)) {eval = paste(eval, ',')}
-    }
     output$Diversity <- renderPlot({
       if (!is.null(ranges$x)) {diversity = crop(x@diversity.map, c(ranges$x, ranges$y))} else {diversity = x@diversity.map}
       spplot(diversity,
-           main = eval,
+           main = paste('Mean species richness error:', round(x@evaluation['mean','species.richness.error'], 3)),
            xlab = 'Longitude (\u02DA)',
            ylab = 'Latitude (\u02DA)',
            col.regions = rev(terrain.colors(10000)))
@@ -177,27 +171,24 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
       })
     # Evaluation
     output$evaluation.barplot <- renderPlot({
-      evaluation = x@algorithm.evaluation
-      evaluation$kept.model = evaluation$kept.model / as.numeric(x@parameters$rep)
-      metrics = '% kept.model'
-      metrics.nb = c(which(names(evaluation) == 'kept.model'))
-      for (i in 1:length(strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1])) {
-        metrics = c(metrics, strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i])
-        metrics.nb = c(metrics.nb, which(names(evaluation) == strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i]))
-      }
-      table <- t(evaluation[metrics.nb])
-      barplot(table, col = rainbow(length(metrics)), names.arg = row.names(evaluation), beside=TRUE)
-      legend('bottomright', metrics, fill = rainbow(length(metrics)))
+      evaluation <- as.matrix(x@evaluation['mean',])
+      colnames(evaluation)[1:2] <- c('richness', 'success')
+      barplot(evaluation, col = rainbow(length(evaluation)), beside=TRUE)
     })
-    output$evaluation.table <- renderTable({x@algorithm.evaluation[c(2,4:8)]})
+    output$evaluation.table <- renderTable({
+      evaluation <- x@evaluation
+      names(evaluation)[1:2] <- c('richness', 'success')
+      evaluation
+    })
+
+    # Algorithms correlation
     if (length(x@algorithm.correlation) > 0) {
-      # Algorithms correlation
       output$algo.corr.table <- renderTable({x@algorithm.correlation})
       output$algo.corr.heatmap <- renderPlot({
         m <- as.matrix(x@algorithm.correlation)
         heatmap.2(x = m, Rowv = FALSE, Colv = FALSE, dendrogram = "none",
                   cellnote = round(m,2), notecol = "black", notecex = 2,
-                  trace = "none", key = FALSE, margins = c(7, 11), na.rm = T,
+                  trace = "none", key = FALSE, margins = c(7, 11), na.rm = TRUE,
                   col = rev(heat.colors(1000)))
       })
     }
@@ -219,19 +210,19 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
       row.names(summary) = c('Occurrences type', 'Final number of species', 'Original algorithms', 'Number of repetitions',
                              'Pseudo-absences selection', 'Cross validation method', 'Cross validation parameters')
       algo.info = character()
-      for (i in 1:length(strsplit(x@parameters$algorithms, '.', fixed = T)[[1]][-1])) {
-        algo.info = paste(algo.info, strsplit(x@parameters$algorithms, '.', fixed = T)[[1]][-1][i])
+      for (i in seq_len(length(strsplit(x@parameters$algorithms, '.', fixed = TRUE)[[1]][-1]))) {
+        algo.info = paste(algo.info, strsplit(x@parameters$algorithms, '.', fixed = TRUE)[[1]][-1][i])
       }
       if (x@parameters$PA) {PA = 'default'}
       if(x@parameters$cv == 'LOO') {cv.param = 'None'}
       if(x@parameters$cv == 'holdout') {cv.param = paste('fraction =',
-                                                         strsplit(x@parameters$cv.param, '|', fixed = T)[[1]][2],
+                                                         strsplit(x@parameters$cv.param, '|', fixed = TRUE)[[1]][2],
                                                          'rep =',
-                                                         strsplit(x@parameters$cv.param, '|', fixed = T)[[1]][3])}
+                                                         strsplit(x@parameters$cv.param, '|', fixed = TRUE)[[1]][3])}
       if(x@parameters$cv == 'k-fold') {cv.param = paste('k =',
-                                                        strsplit(x@parameters$cv.param, '|', fixed = T)[[1]][2],
+                                                        strsplit(x@parameters$cv.param, '|', fixed = TRUE)[[1]][2],
                                                         'rep =',
-                                                        strsplit(x@parameters$cv.param, '|', fixed = T)[[1]][3])}
+                                                        strsplit(x@parameters$cv.param, '|', fixed = TRUE)[[1]][3])}
       summary$Summary = c(x@parameters$data, length(x@enms), algo.info, x@parameters$rep, PA, x@parameters$cv, cv.param)
       if(!is.null(x@parameters$sp.nb.origin)) {
         summary = rbind(summary,
@@ -256,7 +247,7 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
     })
     output$varimp.info <- renderText({
       varimp.info = 'Variable relative contribution evaluated with '
-      for (i in 1:length(x@parameters$axes.metric)) {
+      for (i in seq_len(length(x@parameters$axes.metric))) {
         if (i == 1) {
           varimp.info = paste(varimp.info, x@parameters$axes.metric[i])
         } else if (i == length(x@parameters$axes.metric) && i != 1) {
@@ -269,13 +260,13 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
     })
     output$evaluation.info <- renderText({
       evaluation.info = 'Models evaluated with'
-      for (i in 1:length(strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1])) {
+      for (i in seq_len(length(strsplit(x@parameters$ensemble.metric, '.', fixed = TRUE)[[1]][-1]))) {
         if (i == 1) {
-          evaluation.info = paste(evaluation.info, strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')')
+          evaluation.info = paste(evaluation.info, strsplit(x@parameters$ensemble.metric, '.', fixed = TRUE)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = TRUE)[[1]][-1][i],')')
         } else if (i == length(x@parameters$axes.metric) && i != 1) {
-          evaluation.info = paste(evaluation.info, 'and', strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')','.')
+          evaluation.info = paste(evaluation.info, 'and', strsplit(x@parameters$ensemble.metric, '.', fixed = TRUE)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = TRUE)[[1]][-1][i],')','.')
         } else {
-          evaluation.info = paste(evaluation.info, ',', strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')')
+          evaluation.info = paste(evaluation.info, ',', strsplit(x@parameters$ensemble.metric, '.', fixed = TRUE)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = TRUE)[[1]][-1][i],')')
         }
       }
       if (x@parameters$weight) {evaluation.info = paste(evaluation.info, ', and then weighted with the previous metrics means')}
@@ -313,7 +304,7 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
                           pch = 16, cex = 0.7, col = 'black'))
     })
     output$niche <- renderPlot({
-      niche.map = reclassify(x@enms[[which(choices == input$enmchoice)]]@projection, c(-Inf,x@enms[[which(choices == input$enmchoice)]]@evaluation$threshold,0, x@enms[[which(choices == input$enmchoice)]]@evaluation$threshold,Inf,1))
+      niche.map = x@enms[[which(choices == input$enmchoice)]]@binary
       if (!is.null(ranges$x)) {niche.map = crop(niche.map, c(ranges$x, ranges$y))}
       spplot(niche.map,
            main = paste('AUC :',round(x@enms[[which(choices == input$enmchoice)]]@evaluation$AUC,3),'  Kappa',round(x@enms[[which(choices == input$enmchoice)]]@evaluation$Kappa,3)),
@@ -330,8 +321,8 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
       })
     # Evaluation
     output$enm.evaluation.barplot <- renderPlot({
-      for (i in 1:length(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation))) {row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i] = strsplit(as.character(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i]), '.SDM', fixed = T)[[1]][1]}
-      for (i in 1:length(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation))) {row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i] = tail(strsplit(as.character(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i]), '.', fixed = T)[[1]], n = 1)}
+      for (i in seq_len(length(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)))) {row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i] = strsplit(as.character(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i]), '.SDM', fixed = TRUE)[[1]][1]}
+      for (i in seq_len(length(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)))) {row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i] = tail(strsplit(as.character(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i]), '.', fixed = TRUE)[[1]], n = 1)}
       evaluation = x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation
       evaluation$kept.model = evaluation$kept.model / max(evaluation$kept.model)
       table <- t(cbind(evaluation$AUC, evaluation$Kappa, evaluation$kept.model))
@@ -339,24 +330,24 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
       legend('bottomright', c('AUC', 'Kappa','Kept model'), fill = c("darkblue","red","green"))
     })
     output$enm.evaluation.table <- renderTable({
-      for (i in 1:length(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation))) {row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i] = strsplit(as.character(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i]), '.SDM')[[1]][1]}
-      for (i in 1:length(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation))) {row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i] = tail(strsplit(as.character(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i]), '.', fixed = T)[[1]], n = 1)}
+      for (i in seq_len(length(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)))) {row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i] = strsplit(as.character(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i]), '.SDM')[[1]][1]}
+      for (i in seq_len(length(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)))) {row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i] = tail(strsplit(as.character(row.names(x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation)[i]), '.', fixed = TRUE)[[1]], n = 1)}
       x@enms[[which(choices == input$enmchoice)]]@algorithm.evaluation[c(2,4:8)]
     })
     # Algorithms correlation
     output$enm.algo.corr.table <- renderTable({
       if (length(x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation) > 0) {
-        x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation[upper.tri(x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation, diag = T)] = NA
+        x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation[upper.tri(x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation, diag = TRUE)] = NA
         x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation
       }
     })
     output$enm.algo.corr.heatmap <- renderPlot({
       if (length(x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation) > 0) {
-        x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation[upper.tri(x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation, diag = T)] = NA
+        x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation[upper.tri(x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation, diag = TRUE)] = NA
         m <- as.matrix(x@enms[[which(choices == input$enmchoice)]]@algorithm.correlation)
         heatmap.2(x = m, Rowv = FALSE, Colv = FALSE, dendrogram = "none",
                   cellnote = round(m,3), notecol = "black", notecex = 2,
-                  trace = "none", key = FALSE, margins = c(7, 11), na.rm = T,
+                  trace = "none", key = FALSE, margins = c(7, 11), na.rm = TRUE,
                   col = rev(heat.colors(1000)))
       }
     })
@@ -375,8 +366,8 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
       row.names(summary) = c('Occurrences type', 'Occurrences number', 'Final number of species', 'Original algorithms', 'Number of repetitions',
                              'Pseudo-absences selection', 'Cross validation method', 'Cross validation parameters')
       algo.info = character()
-      for (i in 1:length(strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$algorithms, '.', fixed = T)[[1]][-1])) {
-        algo.info = paste(algo.info, strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$algorithms, '.', fixed = T)[[1]][-1][i])
+      for (i in seq_len(length(strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$algorithms, '.', fixed = TRUE)[[1]][-1]))) {
+        algo.info = paste(algo.info, strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$algorithms, '.', fixed = TRUE)[[1]][-1][i])
       }
       if (x@enms[[which(choices == input$enmchoice)]]@parameters$PA) {PA = 'default'}
       if (x@enms[[which(choices == input$enmchoice)]]@parameters$data == "presence-only data set") {
@@ -386,13 +377,13 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
       }
       if(x@enms[[which(choices == input$enmchoice)]]@parameters$cv == 'LOO') {cv.param = 'None'}
       if(x@enms[[which(choices == input$enmchoice)]]@parameters$cv == 'holdout') {cv.param = paste('fraction =',
-                                                         strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$cv.param, '|', fixed = T)[[1]][2],
+                                                         strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$cv.param, '|', fixed = TRUE)[[1]][2],
                                                          'rep =',
-                                                         strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$cv.param, '|', fixed = T)[[1]][3])}
+                                                         strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$cv.param, '|', fixed = TRUE)[[1]][3])}
       if(x@parameters$cv == 'k-fold') {cv.param = paste('k =',
-                                                        strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$cv.param, '|', fixed = T)[[1]][2],
+                                                        strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$cv.param, '|', fixed = TRUE)[[1]][2],
                                                         'rep =',
-                                                        strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$cv.param, '|', fixed = T)[[1]][3])}
+                                                        strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$cv.param, '|', fixed = TRUE)[[1]][3])}
       summary$Summary = c(x@enms[[which(choices == input$enmchoice)]]@parameters$data, nb.occ, length(x@enms), algo.info, x@enms[[which(choices == input$enmchoice)]]@parameters$rep, PA, x@enms[[which(choices == input$enmchoice)]]@parameters$cv, cv.param)
       if(!is.null(x@enms[[which(choices == input$enmchoice)]]@parameters$sp.nb.origin)) {
         summary = rbind(summary,
@@ -414,7 +405,7 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
     })
     output$enm.varimp.info <- renderText({
       varimp.info = 'Axes evaluated with the variation of '
-      for (i in 1:length(x@enms[[which(choices == input$enmchoice)]]@parameters$axes.metric)) {
+      for (i in seq_len(length(x@enms[[which(choices == input$enmchoice)]]@parameters$axes.metric))) {
         if (i == 1) {
           varimp.info = paste(varimp.info, x@enms[[which(choices == input$enmchoice)]]@parameters$axes.metric[i])
         } else if (i == length(x@enms[[which(choices == input$enmchoice)]]@parameters$axes.metric) && i != 1) {
@@ -427,13 +418,13 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
     })
     output$enm.evaluation.info <- renderText({
       evaluation.info = 'Models evaluated with'
-      for (i in 1:length(strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.metric, '.', fixed = T)[[1]][-1])) {
+      for (i in seq_len(length(strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.metric, '.', fixed = TRUE)[[1]][-1]))) {
         if (i == 1) {
-          evaluation.info = paste(evaluation.info, strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')')
+          evaluation.info = paste(evaluation.info, strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.metric, '.', fixed = TRUE)[[1]][-1][i],'(>',strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.thresh, '|', fixed = TRUE)[[1]][-1][i],')')
         } else if (i == length(x@enms[[which(choices == input$enmchoice)]]@parameters$axes.metric) && i != 1) {
-          evaluation.info = paste(evaluation.info, 'and', strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')','.')
+          evaluation.info = paste(evaluation.info, 'and', strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.metric, '.', fixed = TRUE)[[1]][-1][i],'(>',strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.thresh, '|', fixed = TRUE)[[1]][-1][i],')','.')
         } else {
-          evaluation.info = paste(evaluation.info, ',', strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')')
+          evaluation.info = paste(evaluation.info, ',', strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.metric, '.', fixed = TRUE)[[1]][-1][i],'(>',strsplit(x@enms[[which(choices == input$enmchoice)]]@parameters$ensemble.thresh, '|', fixed = TRUE)[[1]][-1][i],')')
         }
       }
       if (x@enms[[which(choices == input$enmchoice)]]@parameters$weight) {evaluation.info = paste(evaluation.info, ', and then weighted with the previous metrics means')}
@@ -448,57 +439,58 @@ setMethod('plot', 'Stacked.SDM', function(x, y, ...) {
 #' @rdname plot.model
 #' @export
 setMethod('plot', 'SDM', function(x, y, ...) {
-  if (inherits(x, 'Algorithm.SDM')) {full = F} else {full = T}
-  ui <- dashboardPage(
-    dashboardHeader(title = x@name, titleWidth = 450),
-    dashboardSidebar(disable = T),
-    dashboardBody(
-      fluidRow(
-        tabBox(title = 'Maps',
-               tabPanel( actionButton('unzoom', 'unzoom', icon = icon('search-minus'), width = NULL, ...),
-                         plotOutput('probability', dblclick = "plot1_dblclick", brush = brushOpts(id = "plot1_brush", resetOnNew = TRUE)),
-                         title = 'Habitat suitability'),
-               if(full) {tabPanel(plotOutput('niche'), title = 'Binary map')},
-               if(full) {tabPanel(plotOutput('uncertainty'), title = 'uncertainty')},
-               tabPanel(tableOutput('summary'), title = 'Summary')
-        ),
-        tabBox(title = 'Variables importance',
-               tabPanel(plotOutput('varimp.barplot'),
-                        textOutput('varimp.info'),
-                        title = 'Barplot'),
-               tabPanel(tableOutput('varimp.table'), title = 'Table'),
-               tabPanel(tableOutput('varimplegend'), title = 'Legend')
-        )
-      ),
-      if(full) {
-        fluidRow(
-          tabBox(title = 'Model evaluation',
-                 tabPanel(plotOutput('evaluation.barplot'),
-                          textOutput('evaluation.info'),
-                          title = 'Barplot'),
-                 tabPanel(tableOutput('evaluation.table'), title = 'Table')
-          ),
-          if (length(x@algorithm.correlation) > 0) {
-            tabBox(title = 'Algorithms correlation',
-                   tabPanel(plotOutput('algo.corr.heatmap'), title = 'Heatmap'),
-                   tabPanel(tableOutput('algo.corr.table'), title = 'Table')
-            )}
-        )}
-    )
-  )
+  if (inherits(x, "Algorithm.SDM")) {
+    full <- FALSE
+  } else {
+    full <- TRUE
+  }
+  ui <- dashboardPage(dashboardHeader(title = x@name, titleWidth = 450),
+                      dashboardSidebar(disable = TRUE), dashboardBody(fluidRow(tabBox(title = "Maps",
+                                                                                      tabPanel(actionButton("unzoom", "unzoom", icon = icon("search-minus"),
+                                                                                                            width = NULL, ...), plotOutput("probability", dblclick = "plot1_dblclick",
+                                                                                                                                           brush = brushOpts(id = "plot1_brush", resetOnNew = TRUE)),
+                                                                                               title = "Habitat suitability"), if (full) {
+                                                                                                 tabPanel(plotOutput("niche"), title = "Binary map")
+                                                                                               }, if (full) {
+                                                                                                 tabPanel(plotOutput("uncertainty"), title = "uncertainty")
+                                                                                               }, tabPanel(tableOutput("summary"), title = "Summary")), tabBox(title = "Variables importance",
+                                                                                                                                                               tabPanel(plotOutput("varimp.barplot"), textOutput("varimp.info"),
+                                                                                                                                                                        title = "Barplot"), tabPanel(tableOutput("varimp.table"), title = "Table"),
+                                                                                                                                                               tabPanel(tableOutput("varimplegend"), title = "Legend"))), if (full) {
+                                                                                                                                                                 fluidRow(tabBox(title = "Model evaluation", tabPanel(plotOutput("evaluation.barplot"),
+                                                                                                                                                                                                                      textOutput("evaluation.info"), title = "Barplot"), tabPanel(tableOutput("evaluation.table"),
+                                                                                                                                                                                                                                                                                  title = "Table")), if (length(x@algorithm.correlation) > 0) {
+                                                                                                                                                                                                                                                                                    tabBox(title = "Algorithms correlation", tabPanel(plotOutput("algo.corr.heatmap"),
+                                                                                                                                                                                                                                                                                                                                      title = "Heatmap"), tabPanel(tableOutput("algo.corr.table"),
+                                                                                                                                                                                                                                                                                                                                                                   title = "Table"))
+                                                                                                                                                                                                                                                                                  })
+                                                                                                                                                               }))
 
 
   server <- function(input, output) {
     set.seed(122)
 
-    if(full) {
-      for (i in 1:length(row.names(x@algorithm.evaluation))) {row.names(x@algorithm.evaluation)[i] = strsplit(as.character(row.names(x@algorithm.evaluation)[i]), '.SDM', fixed = T)[[1]][1]}
-      for (i in 1:length(row.names(x@algorithm.evaluation))) {row.names(x@algorithm.evaluation)[i] = tail(strsplit(as.character(row.names(x@algorithm.evaluation)[i]), '.', fixed = T), n = 1)}
+    if (full) {
+      for (i in seq_len(length(row.names(x@algorithm.evaluation)))) {
+        row.names(x@algorithm.evaluation)[i] <- strsplit(as.character(row.names(x@algorithm.evaluation)[i]),
+                                                         ".SDM", fixed = TRUE)[[1]][1]
+      }
+      for (i in seq_len(length(row.names(x@algorithm.evaluation)))) {
+        row.names(x@algorithm.evaluation)[i] <- tail(strsplit(as.character(row.names(x@algorithm.evaluation)[i]),
+                                                              ".", fixed = TRUE), n = 1)
+      }
       if (length(x@algorithm.correlation) > 0) {
-        for (i in 1:length(row.names(x@algorithm.correlation))) {row.names(x@algorithm.correlation)[i] = strsplit(as.character(row.names(x@algorithm.correlation)[i]), '.SDM', fixed = T)[[1]][1]}
-        for (i in 1:length(row.names(x@algorithm.correlation))) {row.names(x@algorithm.correlation)[i] = tail(strsplit(as.character(row.names(x@algorithm.correlation)[i]), '.', fixed = T), n = 1)}
-        x@algorithm.correlation[upper.tri(x@algorithm.correlation, diag = T)] = NA
-        names(x@algorithm.correlation) = row.names(x@algorithm.correlation)
+        for (i in seq_len(length(row.names(x@algorithm.correlation)))) {
+          row.names(x@algorithm.correlation)[i] <- strsplit(as.character(row.names(x@algorithm.correlation)[i]),
+                                                            ".SDM", fixed = TRUE)[[1]][1]
+        }
+        for (i in seq_len(length(row.names(x@algorithm.correlation)))) {
+          row.names(x@algorithm.correlation)[i] <- tail(strsplit(as.character(row.names(x@algorithm.correlation)[i]),
+                                                                 ".", fixed = TRUE), n = 1)
+        }
+        x@algorithm.correlation[upper.tri(x@algorithm.correlation,
+                                          diag = TRUE)] <- NA
+        names(x@algorithm.correlation) <- row.names(x@algorithm.correlation)
       }
     }
     # Maps
@@ -508,9 +500,15 @@ setMethod('plot', 'SDM', function(x, y, ...) {
     observeEvent(input$plot1_dblclick, {
       brush <- input$plot1_brush
       if (!is.null(brush)) {
-        if(!is.null(ranges$x)){ref = crop(x@projection, c(ranges$x, ranges$y))} else {ref = x@projection}
-        ranges$x <- c(brush$xmin, brush$xmax) * (extent(ref)[2] - extent(ref)[1]) + extent(ref)[1]
-        ranges$y <- c(brush$ymin, brush$ymax) * (extent(ref)[4] - extent(ref)[3]) + extent(ref)[3]
+        if (!is.null(ranges$x)) {
+          ref <- crop(x@projection, c(ranges$x, ranges$y))
+        } else {
+          ref <- x@projection
+        }
+        ranges$x <- c(brush$xmin, brush$xmax) * (extent(ref)[2] - extent(ref)[1]) +
+          extent(ref)[1]
+        ranges$y <- c(brush$ymin, brush$ymax) * (extent(ref)[4] - extent(ref)[3]) +
+          extent(ref)[3]
       } else {
         ranges$x <- NULL
         ranges$y <- NULL
@@ -521,123 +519,162 @@ setMethod('plot', 'SDM', function(x, y, ...) {
       ranges$y <- NULL
     })
     output$probability <- renderPlot({
-      if (!is.null(ranges$x)) {proba.map = crop(x@projection, c(ranges$x, ranges$y))} else {proba.map = x@projection}
-      spplot(proba.map,
-           main = paste('AUC :',round(x@evaluation$AUC,3),'  Kappa',round(x@evaluation$Kappa,3)),
-           xlab = 'Longitude (\u02DA)',
-           ylab = 'Latitude (\u02DA)',
-           col.regions = rev(terrain.colors(10000)),
-           sp.layout=list(SpatialPoints(data.frame(X = x@data$X[which(x@data$Presence == 1)], Y = x@data$Y[which(x@data$Presence == 1)])),
-                          pch = 16, cex = 0.7, col = 'black'))
+      if (!is.null(ranges$x)) {
+        proba.map <- crop(x@projection, c(ranges$x, ranges$y))
+      } else {
+        proba.map <- x@projection
+      }
+      spplot(proba.map, main = paste("AUC :", round(x@evaluation$AUC,
+                                                    3), "  Kappa", round(x@evaluation$Kappa, 3)), xlab = "Longitude (\u02DA)",
+             ylab = "Latitude (\u02DA)", col.regions = rev(terrain.colors(10000)),
+             sp.layout = list(SpatialPoints(data.frame(X = x@data$X[which(x@data$Presence ==
+                                                                            1)], Y = x@data$Y[which(x@data$Presence == 1)])), pch = 16,
+                              cex = 0.7, col = "black"))
     })
     output$niche <- renderPlot({
       if (!is.null(ranges$x)) {
-        niche.map = crop(reclassify(x@projection, c(-Inf,x@evaluation$threshold,0, x@evaluation$threshold,Inf,1)), c(ranges$x, ranges$y))
-      } else {niche.map = reclassify(x@projection, c(-Inf,x@evaluation$threshold,0, x@evaluation$threshold,Inf,1))}
-      spplot(niche.map,
-           main = paste('AUC :',round(x@evaluation$AUC,3),'  Kappa',round(x@evaluation$Kappa,3)),
-           xlab = 'Longitude (\u02DA)',
-           ylab = 'Latitude (\u02DA)',
-           col.regions = rev(terrain.colors(10000)))
+        niche.map <- x@binary
+      } else {
+        niche.map <- reclassify(x@projection, c(-Inf, x@evaluation$threshold,
+                                                0, x@evaluation$threshold, Inf, 1))
+      }
+      spplot(niche.map, main = paste("AUC :", round(x@evaluation$AUC,
+                                                    3), "  Kappa", round(x@evaluation$Kappa, 3)), xlab = "Longitude (\u02DA)",
+             ylab = "Latitude (\u02DA)", col.regions = rev(terrain.colors(10000)))
     })
-    if(full) {
+    if (full) {
       output$uncertainty <- renderPlot({
-        if (!is.null(ranges$x)) {uncert.map = crop(x@uncertainty, c(ranges$x, ranges$y))} else {uncert.map = x@uncertainty}
-        spplot(uncert.map,
-             xlab = 'Longitude (\u02DA)',
-             ylab = 'Latitude (\u02DA)',
-             col.regions = rev(terrain.colors(10000)))
-        })
-      output$evaluation.barplot <- renderPlot({
-        evaluation = x@algorithm.evaluation
-        if(!is.null(x@parameters$rep)) {
-          evaluation$kept.model = evaluation$kept.model / as.numeric(x@parameters$rep)
+        if (!is.null(ranges$x)) {
+          uncert.map <- crop(x@uncertainty, c(ranges$x, ranges$y))
         } else {
-          evaluation$kept.model = evaluation$kept.model / max(evaluation$kept.model)
+          uncert.map <- x@uncertainty
         }
-        metrics = '% kept.model'
-        metrics.nb = c(which(names(evaluation) == 'kept.model'))
-        for (i in 1:length(strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1])) {
-          metrics = c(metrics, strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i])
-          metrics.nb = c(metrics.nb, which(names(evaluation) == strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i]))
+        spplot(uncert.map, xlab = "Longitude (\u02DA)", ylab = "Latitude (\u02DA)",
+               col.regions = rev(terrain.colors(10000)))
+      })
+      output$evaluation.barplot <- renderPlot({
+        evaluation <- x@algorithm.evaluation
+        if (!is.null(x@parameters$rep)) {
+          evaluation$kept.model <- evaluation$kept.model/as.numeric(x@parameters$rep)
+        } else {
+          evaluation$kept.model <- evaluation$kept.model/max(evaluation$kept.model)
+        }
+        metrics <- "% kept.model"
+        metrics.nb <- c(which(names(evaluation) == "kept.model"))
+        for (i in seq_len(length(strsplit(x@parameters$ensemble.metric,
+                                          ".", fixed = TRUE)[[1]][-1]))) {
+          metrics <- c(metrics, strsplit(x@parameters$ensemble.metric,
+                                         ".", fixed = TRUE)[[1]][-1][i])
+          metrics.nb <- c(metrics.nb, which(names(evaluation) ==
+                                              strsplit(x@parameters$ensemble.metric, ".", fixed = TRUE)[[1]][-1][i]))
         }
         table <- t(evaluation[metrics.nb])
-        barplot(table, col = rainbow(length(metrics)), names.arg = row.names(evaluation), beside=TRUE)
-        legend('bottomright', metrics, fill = rainbow(length(metrics)))
+        barplot(table, col = rainbow(length(metrics)), names.arg = row.names(evaluation),
+                beside = TRUE)
+        legend("bottomright", metrics, fill = rainbow(length(metrics)))
       })
-      output$evaluation.table <- renderTable({x@algorithm.evaluation[c(2,4:8)]})
+      output$evaluation.table <- renderTable({
+        x@algorithm.evaluation[c(2, 4:8)]
+      })
       if (length(x@algorithm.correlation) > 0) {
         # Algorithms correlation
-        output$algo.corr.table <- renderTable({x@algorithm.correlation})
+        output$algo.corr.table <- renderTable({
+          x@algorithm.correlation
+        })
         output$algo.corr.heatmap <- renderPlot({
           m <- as.matrix(x@algorithm.correlation)
           heatmap.2(x = m, Rowv = FALSE, Colv = FALSE, dendrogram = "none",
-                    cellnote = round(m,3), notecol = "black", notecex = 2,
-                    trace = "none", key = FALSE, margins = c(7, 11), na.rm = T,
+                    cellnote = round(m, 3), notecol = "black", notecex = 2,
+                    trace = "none", key = FALSE, margins = c(7, 11), na.rm = TRUE,
                     col = rev(heat.colors(1000)))
         })
       }
     }
     # Variable importance
     output$varimp.barplot <- renderPlot({
-      varimp = as.data.frame(t(x@variable.importance))
-      names(varimp) = 'Axes.evaluation'
-      barplot(varimp$Axes.evaluation, names.arg = abbreviate(row.names(varimp)), las = 2)
+      varimp <- as.data.frame(t(x@variable.importance))
+      names(varimp) <- "Axes.evaluation"
+      barplot(varimp$Axes.evaluation, names.arg = abbreviate(row.names(varimp)),
+              las = 2)
     })
-    output$varimp.table <- renderTable({x@variable.importance})
-    output$varimplegend <- renderTable({data.frame('Abbreviation' = abbreviate(names(x@variable.importance)), 'Variable' = names(x@variable.importance))})
+    output$varimp.table <- renderTable({
+      x@variable.importance
+    })
+    output$varimplegend <- renderTable({
+      data.frame(Abbreviation = abbreviate(names(x@variable.importance)),
+                 Variable = names(x@variable.importance))
+    })
     # Parameters
     output$summary <- renderTable({
-      summary = data.frame(matrix(nrow = 4, ncol = 1))
-      names(summary) = 'Summary'
-      row.names(summary) = c('Occurrences type', 'Pseudo-absences selection', 'Cross validation method', 'Cross validation parameters')
-      if (x@parameters$PA) {PA = 'default'}
-      if(x@parameters$cv == 'LOO') {cv.param = 'None'}
-      if(x@parameters$cv == 'holdout') {cv.param = paste('fraction =',
-                                                         strsplit(x@parameters$cv.param, '|', fixed = T)[[1]][2],
-                                                         'rep =',
-                                                         strsplit(x@parameters$cv.param, '|', fixed = T)[[1]][3])}
-      if(x@parameters$cv == 'k-fold') {cv.param = paste('k =',
-                                                        strsplit(x@parameters$cv.param, '|', fixed = T)[[1]][2],
-                                                        'rep =',
-                                                        strsplit(x@parameters$cv.param, '|', fixed = T)[[1]][3])}
-      summary$Summary = c(x@parameters$data, PA, x@parameters$cv, cv.param)
-      if(!is.null(x@parameters$algorithms)) {
-        algo.info = character()
-        for (i in 1:length(strsplit(x@parameters$algorithms, '.', fixed = T)[[1]][-1])) {
-          algo.info = paste(algo.info, strsplit(x@parameters$algorithms, '.', fixed = T)[[1]][-1][i])
+      summary <- data.frame(matrix(nrow = 4, ncol = 1))
+      names(summary) <- "Summary"
+      row.names(summary) <- c("Occurrences type", "Pseudo-absences selection",
+                              "Cross validation method", "Cross validation parameters")
+      if (x@parameters$PA) {
+        PA <- "default"
+      }
+      if (x@parameters$cv == "LOO") {
+        cv.param <- "None"
+      }
+      if (x@parameters$cv == "holdout") {
+        cv.param <- paste("fraction =", strsplit(x@parameters$cv.param,
+                                                 "|", fixed = TRUE)[[1]][2], "rep =", strsplit(x@parameters$cv.param,
+                                                                                               "|", fixed = TRUE)[[1]][3])
+      }
+      if (x@parameters$cv == "k-fold") {
+        cv.param <- paste("k =", strsplit(x@parameters$cv.param, "|",
+                                          fixed = TRUE)[[1]][2], "rep =", strsplit(x@parameters$cv.param,
+                                                                                   "|", fixed = TRUE)[[1]][3])
+      }
+      summary$Summary <- c(x@parameters$data, PA, x@parameters$cv, cv.param)
+      if (!is.null(x@parameters$algorithms)) {
+        algo.info <- character()
+        for (i in seq_len(length(strsplit(x@parameters$algorithms,
+                                          ".", fixed = TRUE)[[1]][-1]))) {
+          algo.info <- paste(algo.info, strsplit(x@parameters$algorithms,
+                                                 ".", fixed = TRUE)[[1]][-1][i])
         }
-        summary = rbind(summary,
-                        data.frame(Summary = c(algo.info, x@parameters$rep)
-                                   , row.names = c('Original algorithms','Number of repetitions')))
+        summary <- rbind(summary, data.frame(Summary = c(algo.info,
+                                                         x@parameters$rep), row.names = c("Original algorithms",
+                                                                                          "Number of repetitions")))
       }
       summary
     })
     output$varimp.info <- renderText({
-      varimp.info = 'Axes evaluated with the variation of '
-      for (i in 1:length(x@parameters$axes.metric)) {
+      varimp.info <- "Axes evaluated with the variation of "
+      for (i in seq_len(length(x@parameters$axes.metric))) {
         if (i == 1) {
-          varimp.info = paste(varimp.info, x@parameters$axes.metric[i])
+          varimp.info <- paste(varimp.info, x@parameters$axes.metric[i])
         } else if (i == length(x@parameters$axes.metric) && i != 1) {
-          varimp.info = paste(varimp.info, 'and', x@parameters$axes.metric[i], '.')
+          varimp.info <- paste(varimp.info, "and", x@parameters$axes.metric[i],
+                               ".")
         } else {
-          varimp.info = paste(varimp.info, ',', x@parameters$axes.metric[i])
+          varimp.info <- paste(varimp.info, ",", x@parameters$axes.metric[i])
         }
       }
       varimp.info
     })
     output$evaluation.info <- renderText({
-      evaluation.info = 'Models evaluated with'
-      for (i in 1:length(strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1])) {
+      evaluation.info <- "Models evaluated with"
+      for (i in seq_len(length(strsplit(x@parameters$ensemble.metric,
+                                        ".", fixed = TRUE)[[1]][-1]))) {
         if (i == 1) {
-          evaluation.info = paste(evaluation.info, strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')')
+          evaluation.info <- paste(evaluation.info, strsplit(x@parameters$ensemble.metric,
+                                                             ".", fixed = TRUE)[[1]][-1][i], "(>", strsplit(x@parameters$ensemble.thresh,
+                                                                                                            "|", fixed = TRUE)[[1]][-1][i], ")")
         } else if (i == length(x@parameters$axes.metric) && i != 1) {
-          evaluation.info = paste(evaluation.info, 'and', strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')','.')
+          evaluation.info <- paste(evaluation.info, "and", strsplit(x@parameters$ensemble.metric,
+                                                                    ".", fixed = TRUE)[[1]][-1][i], "(>", strsplit(x@parameters$ensemble.thresh,
+                                                                                                                   "|", fixed = TRUE)[[1]][-1][i], ")", ".")
         } else {
-          evaluation.info = paste(evaluation.info, ',', strsplit(x@parameters$ensemble.metric, '.', fixed = T)[[1]][-1][i],'(>',strsplit(x@parameters$ensemble.thresh, '|', fixed = T)[[1]][-1][i],')')
+          evaluation.info <- paste(evaluation.info, ",", strsplit(x@parameters$ensemble.metric,
+                                                                  ".", fixed = TRUE)[[1]][-1][i], "(>", strsplit(x@parameters$ensemble.thresh,
+                                                                                                                 "|", fixed = TRUE)[[1]][-1][i], ")")
         }
       }
-      if (x@parameters$weight) {evaluation.info = paste(evaluation.info, ', and then weighted with the previous metrics means')}
+      if (x@parameters$weight) {
+        evaluation.info <- paste(evaluation.info, ", and then weighted with the previous metrics means")
+      }
       evaluation.info
     })
   }

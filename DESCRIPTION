@@ -1,10 +1,11 @@
 Package: SSDM
 Type: Package
 Title: Stacked Species Distribution Modelling
-Version: 0.1.1
-Date: 2016-02-17
+Version: 0.2.0
 Author: Sylvain Schmitt, Robin Pouteau, Dimitri Justeau, Philippe Birnbaum
 Maintainer: Sylvain Schmitt <sylvain.schmitt@agroparistech.fr>
+URL: https://github.com/sylvainschmitt/SSDM
+BugReports: https://github.com/sylvainschmitt/SSDM/issues
 Description: Allows to map species richness and endemism based on stacked
     species distribution models (SSDM). Individuals SDMs can be created using a
     single or multiple algorithms (ensemble SDMs). For each species, an SDM can
@@ -20,16 +21,20 @@ Imports: sp (>= 1.2.0), raster (>= 2.4.20), methods (>= 3.2.2),
         SDMTools (>= 1.1.221), mgcv (>= 1.8.7), earth (>= 4.4.3), rpart
         (>= 4.1.10), gbm (>= 2.1.1), randomForest (>= 4.6.10), dismo
         (>= 1.0.12), nnet (>= 7.3.10), e1071 (>= 1.6.7), shiny (>=
-        0.12.2), shinydashboard (>= 0.5.1), gplots (>= 0.1.0), spThin
-        (>= 0.1.0)
-Suggests: shinyFiles (>= 0.6.0)
+        0.12.2), shinydashboard (>= 0.5.1), gplots (>= 0.1.0),
+        shinyFiles (>= 0.6.0), spThin (>= 0.1.0)
 Depends: R (>= 3.2.2)
-Collate: 'Algorithm.SDM.R' 'Ensemble.SDM.R' 'Env.R' 'Occurrences.R'
-        'SSDM.R' 'Stacked.SDM.R' 'checkargs.R' 'ensemble.R'
-        'modelling.R' 'ensemble_modelling.R' 'gui.R' 'load_model.R'
-        'load_occ.R' 'load_var.R' 'plot.model.R' 'save.model.R'
-        'stack_modelling.R' 'stacking.R' 'update.stack.R' 'zzz.R'
+Collate: 'SDM.R' 'Algorithm.SDM.R' 'Ensemble.SDM.R' 'Env.R'
+        'Occurrences.R' 'PA.select.R' 'SSDM.R' 'Stacked.SDM.R'
+        'checkargs.R' 'data.values.R' 'ensemble.R' 'modelling.R'
+        'ensemble_modelling.R' 'evaluate.R' 'evaluate.axes.R'
+        'get_PA.R' 'get_model.R' 'gui.R' 'load_model.R' 'load_occ.R'
+        'load_var.R' 'mapDiversity.R' 'plot.model.R' 'project.R'
+        'save.model.R' 'stack_modelling.R' 'stacking.R'
+        'update.stack.R' 'zzz.R'
+Suggests: testthat
+RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2016-02-17 03:20:42 UTC; amap
+Packaged: 2017-03-17 19:39:14 UTC; sylvain
 Repository: CRAN
-Date/Publication: 2016-02-17 09:00:40
+Date/Publication: 2017-03-18 00:13:44 UTC

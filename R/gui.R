@@ -1,12 +1,19 @@
-#' SSDM package Global User Interface
+#' SSDM package Graphic User Interface
 #'
 #' User interface of the SSDM package.
+#'
+#' @param port char. The TCP port that the application should listen on (see
+#'   \code{\link[shiny]{runApp}} for more details).
+#' @param host char. The IPv4 address that the application should listen on (see
+#'   \code{\link[shiny]{runApp}} for more details).
+#' @param working.directory char. Directory in which the application will run.
 #'
 #' @return Open a window with a shiny app to use the SSDM package with an
 #'   user-friendly interface.
 #'
 #' @details If your environmental variables have an important size, you should
 #'   gave enough memory to the interface with the (\code{maxmem} parameter).
+#'   Additionally, you can only run one instance of user interface at a time.
 #'
 #' @examples
 #' \dontrun{
@@ -14,10 +21,14 @@
 #' }
 #'
 #' @export
-gui = function () {
+gui <- function (port = getOption("shiny.port"),
+                 host = getOption("shiny.host", "127.0.0.1"),
+                 working.directory = getwd()) {
   appDir <- system.file("shiny", "gui", package = "SSDM")
   if (appDir == "") {
-    stop("Could not find example directory. Try re-installing `mypackage`.", call. = FALSE)
+    stop("Could not find shiny directory. Try re-installing `SSDM`.", call. = FALSE)
   }
-  shiny::runApp(appDir, display.mode = "normal")
+  assign("working.directory", working.directory, envir = .PkgEnv)
+  shiny::runApp(appDir, display.mode = "normal", port = port, host = host)
+  rm(working.directory, envir = .PkgEnv)
 }

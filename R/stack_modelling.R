@@ -67,7 +67,7 @@ NULL
 #'@param method character. Define the method used to create the local species
 #'  richness map (see details below).
 #'@param rep.B integer. If the method used to create the local species richness
-#'  is the random bernoulli (\strong{B}), rep.B parameter defines the number of
+#'  is the random bernoulli (\strong{Bernoulli}), rep.B parameter defines the number of
 #'  repetitions used to create binary maps for each species.
 #'@param range integer. Set a value of range restriction (in pixels) around
 #'  presences occurrences on habitat suitability maps (all further points will
@@ -129,11 +129,17 @@ NULL
 #'  \strong{Kappa}, \strong{sensitivity}, \strong{specificity}, and
 #'  \strong{prop.correct} (proportion of correctly predicted occurrences).}
 #'  \item{method}{Choice of the method used to compute the local species
-#'  richness map (see Calabrez et al. (2014) for more informations, see
-#'  reference below): \strong{P} (Probablity) sum probabilities of habitat
-#'  suitability maps, \strong{B} (Random Bernoulli) drawing repeatedly from a
-#'  Bernoulli distribution, \strong{T} (Threshold) sum the binary map obtained
-#'  with the thresholding (depending on the metric, see metric parameter).}
+#'  richness map (see Calabrez et al. (2014) and D'Amen et al (2015) for more
+#'  informations, see reference below): \strong{pSSDM} sum probabilities of
+#'  habitat suitability maps, \strong{Bernoulli} drawing repeatedly from a
+#'  Bernoulli distribution, \strong{bSSDM} sum the binary map obtained with the
+#'  thresholding (depending on the metric, see metric parameter),
+#'  \strong{MaximumLikelyhood} adjust species richness of the model by linear
+#'  regression, \strong{PRR.MEM} model richness with a macroecological model
+#'  (MEM) and adjust each ESDM binary map by ranking habitat suitability and
+#'  keeping as much as predicted richness of the MEM, \strong{PRR.pSSDM} model
+#'  richness with a pSSDM and adjust each ESDM binary map by ranking habitat
+#'  suitability and keeping as much as predicted richness of the pSSDM}
 #'  \item{endemism}{Choice of the method used to compute the endemism map (see
 #'  Crisp et al. (2001) for more information, see reference below):
 #'  \strong{NULL} No endemism map, \strong{WEI} (Weighted Endemism Index)
@@ -229,7 +235,7 @@ NULL
 #' data(Occurrences)
 #'
 #' # SSDM building
-#' SSDM = stack_modelling(c('CTA', 'SVM'), Occurrences, Env, rep = 1,
+#' SSDM <- stack_modelling(c('CTA', 'SVM'), Occurrences, Env, rep = 1,
 #'                        Xcol = 'LONGITUDE', Ycol = 'LATITUDE',
 #'                        Spcol = 'SPECIES')
 #'
@@ -239,51 +245,17 @@ NULL
 #'
 #'@seealso \code{\link{modelling}} to build simple SDMs.
 #'
-#'@references M. Barbet-Massin, F. Jiguet, C. H.  Albert, & W. Thuiller (2012)
-#'  "Selecting pseudo-absences for species distribution models: how, where and
-#'  how many?" \emph{Methods Ecology and Evolution} 3:327-338
+#'
+#'@references M. D'Amen, A. Dubuis, R. F. Fernandes, J. Pottier, L. Pelissier, &
+#'  A Guisan (2015) "Using species richness and functional traits prediction to
+#'  constrain assemblage predicitions from stacked species distribution models"
+#'  \emph{Journal of Biogeography} 42(7):1255-1266
+#'  \url{http://doc.rero.ch/record/235561/files/pel_usr.pdf}
+#'
+#'  M. Barbet-Massin, F. Jiguet, C. H.  Albert, & W. Thuiller (2012) "Selecting
+#'  pseudo-absences for species distribution models: how, where and how many?"
+#'  \emph{Methods Ecology and Evolution} 3:327-338
 #'  \url{http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2011.00172.x/full}
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'  C. Liu, P. M. Berry, T. P. Dawson,  R. & G. Pearson (2005) "Selecting
-#'  thresholds of occurrence in the prediction of species distributions."
-#'  \emph{Ecography} 28:85-393
-#'  \url{http://www.researchgate.net/publication/230246974_Selecting_Thresholds_of_Occurrence_in_the_Prediction_of_Species_Distributions}
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
 #'
 #'
 #'
@@ -294,165 +266,214 @@ NULL
 #'
 #'
 #'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
 #'  M. D. Crisp, S. Laffan, H. P. Linder & A. Monro (2001) "Endemism in the
 #'  Australian flora"  \emph{Journal of Biogeography} 28:183-198
 #'  \url{http://biology-assets.anu.edu.au/hosted_sites/Crisp/pdfs/Crisp2001_endemism.pdf}
 #'
 #'
 #'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
+#'  C. Liu, P. M. Berry, T. P. Dawson,  R. & G. Pearson (2005) "Selecting
+#'  thresholds of occurrence in the prediction of species distributions."
+#'  \emph{Ecography} 28:85-393
+#'  \url{http://www.researchgate.net/publication/230246974_Selecting_Thresholds_of_Occurrence_in_the_Prediction_of_Species_Distributions}
 #'
 #'
 #'@export
-stack_modelling = function(algorithms,
+stack_modelling <- function(algorithms,
                            # Modelling data input
                            Occurrences, Env,
                            # Occurrences reading
                            Xcol = 'Longitude', Ycol = 'Latitude', Pcol = NULL, Spcol = 'SpeciesID',
                            # Model creation
-                           rep = 10, name = NULL, save = F, path = getwd(),
+                           rep = 10, name = NULL, save = FALSE, path = getwd(),
                            # Pseudo-absences definition
                            PA = NULL,
                            # Evaluation parameters
                            cv = 'holdout', cv.param = c(0.7,1), thresh = 1001,
-                           axes.metric = 'Pearson', uncertainty = T, tmp = F,
+                           axes.metric = 'Pearson', uncertainty = TRUE, tmp = FALSE,
                            # Assembling parameters
-                           ensemble.metric = c('AUC'), ensemble.thresh = c(0.75), weight = T,
+                           ensemble.metric = c('AUC'), ensemble.thresh = c(0.75), weight = TRUE,
                            # Diversity map computing
-                           method = 'P', metric = 'SES', rep.B = 1000,
+                           method = 'pSSDM', metric = 'SES', rep.B = 1000,
                            # Range restriction and endemism
                            range = NULL, endemism = c('WEI','Binary'),
                            # Informations parameters
-                           verbose = T, GUI = F, cores = 1,
+                           verbose = TRUE, GUI = FALSE, cores = 1,
                            # Modelling parameters
                            ...) {
   # Check arguments
-  .checkargs(Xcol = Xcol, Ycol = Ycol, Pcol = Pcol, Spcol = Spcol, rep = rep, name = name,
-             save = save, path = path,  PA = PA,  cv = cv, cv.param = cv.param,
-             thresh = thresh, axes.metric = axes.metric, uncertainty = uncertainty, tmp = tmp,
-             ensemble.metric = ensemble.metric, ensemble.thresh = ensemble.thresh, weight = weight,
-             method = method, metric = metric, rep.B = rep.B, range = range, endemism = endemism,
-             verbose = verbose, GUI = GUI, cores = cores)
+  .checkargs(Xcol = Xcol, Ycol = Ycol, Pcol = Pcol, Spcol = Spcol, rep = rep,
+             name = name, save = save, path = path, PA = PA, cv = cv, cv.param = cv.param,
+             thresh = thresh, axes.metric = axes.metric, uncertainty = uncertainty,
+             tmp = tmp, ensemble.metric = ensemble.metric, ensemble.thresh = ensemble.thresh,
+             weight = weight, method = method, metric = metric, rep.B = rep.B, range = range,
+             endemism = endemism, verbose = verbose, GUI = GUI, cores = cores)
 
   # Test if algorithm is available
-  available.algo = c('GLM','GAM','MARS','GBM','CTA','RF','MAXENT','ANN','SVM')
-  if ('all' %in% algorithms) {algorithms = available.algo}
-  for (i in 1:length(algorithms)) {
-    if(!(algorithms[[i]] %in% available.algo)) {stop(algorithms[[i]],' is still not available, please use one of those : GLM, GAM, MARS, GBM, CTA, RF, MAXENT, ANN, SVM')}}
-  if (tmp) {
-    tmppath = get("tmpdir",envir=.PkgEnv)
-    if (!("/.enms" %in% list.dirs(tmppath))) (dir.create(paste0(tmppath,'/.enms')))
+  available.algo <- c("GLM", "GAM", "MARS", "GBM", "CTA", "RF", "MAXENT",
+                      "ANN", "SVM")
+  if ("all" %in% algorithms) {
+    algorithms <- available.algo
+  }
+  for (i in seq_len(length(algorithms))) {
+    if (!(algorithms[[i]] %in% available.algo)) {
+      stop(algorithms[[i]], " is still not available, please use one of those : GLM, GAM, MARS, GBM, CTA, RF, MAXENT, ANN, SVM")
     }
+  }
+  if (tmp) {
+    tmppath <- get("tmpdir", envir = .PkgEnv)
+    if (!("/.enms" %in% list.dirs(tmppath)))
+      (dir.create(paste0(tmppath, "/.enms")))
+  }
 
   # Ensemble models creation
-  if(verbose){cat('#### Ensemble models creation ##### \n\n')}
-  species = levels(as.factor(Occurrences[,which(names(Occurrences) == Spcol)]))
+  if (verbose) {
+    cat("#### Ensemble models creation ##### \n\n")
+  }
+  species <- levels(as.factor(Occurrences[, which(names(Occurrences) == Spcol)]))
 
-  if(cores > 1 && requireNamespace("parallel", quietly = TRUE)){
-    if(verbose){cat('Opening clusters,', cores, 'cores \n')}
-    if((parallel::detectCores()-1) < cores){warning('It seems you attributed more cores than your CPU have !')}
-    cl = parallel::makeCluster(cores, outfile = "")
-    if(verbose){cat('Exporting environment to clusters \n')}
-    parallel::clusterExport(cl, varlist=c(lsf.str(envir = globalenv()), ls(envir = environment())), envir = environment())
-    enms = parallel::parLapply(cl, species,
-                               function(species){
-                                 enm.name = species
-                                 Spoccurrences = subset(Occurrences, Occurrences[which(names(Occurrences) == Spcol)] == species)
-                                 if(verbose){cat('Ensemble modelling :', enm.name, '\n\n')}
-                                 enm = try(ensemble_modelling(algorithms, Spoccurrences, Env,
-                                                              Xcol, Ycol, Pcol, rep = rep, name = enm.name, save = F, path = path,
-                                                              PA = PA, cv = cv, cv.param = cv.param, thresh = thresh, metric = metric,
-                                                              axes.metric = axes.metric, uncertainty = uncertainty, tmp = tmp,
-                                                              ensemble.metric = ensemble.metric, ensemble.thresh = ensemble.thresh,
-                                                              weight = weight, verbose = verbose, GUI = F, n.cores = 1, ...))
-                                 if(GUI) {incProgress(1/(length(levels(as.factor(Occurrences[,which(names(Occurrences) == Spcol)])))+1),
-                                                      detail = paste(species,' ensemble SDM built'))}
-                                 if (inherits(enm, "try-error")) {
-                                   if(verbose){cat(enm)}
-                                   enm = NULL
-                                 } else {
-                                   if (tmp && !is.null(enm)) {
-                                     enm@projection = writeRaster(enm@projection[[1]], paste0(path, '/.enms/proba',enm.name), overwrite = T)
-                                     enm@uncertainty = writeRaster(enm@uncertainty, paste0(path, '/.enms/uncert',enm.name), overwrite = T)
-                                   }
-                                   if(verbose){cat('\n\n')}
-                                 }
-                                 return(enm)
-                               }
-    )
-    if(verbose){cat('Closing clusters \n')}
+  if (cores > 0 && requireNamespace("parallel", quietly = TRUE)) {
+    if (verbose) {
+      cat("Opening clusters,", cores, "cores \n")
+    }
+    if ((parallel::detectCores() - 1) < cores) {
+      warning("It seems you attributed more cores than your CPU have !")
+    }
+    cl <- parallel::makeCluster(cores, outfile = "")
+    if (verbose) {
+      cat("Exporting environment to clusters \n")
+    }
+    parallel::clusterExport(cl, varlist = c(lsf.str(envir = globalenv()),
+                                            ls(envir = environment())), envir = environment())
+    enms <- parallel::parLapply(cl, species, function(species) {
+      enm.name <- species
+      Spoccurrences <- subset(Occurrences, Occurrences[which(names(Occurrences) ==
+                                                               Spcol)] == species)
+      if (verbose) {
+        cat("Ensemble modelling :", enm.name, "\n\n")
+      }
+      enm <- try(ensemble_modelling(algorithms, Spoccurrences, Env, Xcol,
+                                    Ycol, Pcol, rep = rep, name = enm.name, save = FALSE, path = path,
+                                    PA = PA, cv = cv, cv.param = cv.param, thresh = thresh, metric = metric,
+                                    axes.metric = axes.metric, uncertainty = uncertainty, tmp = tmp,
+                                    ensemble.metric = ensemble.metric, ensemble.thresh = ensemble.thresh,
+                                    weight = weight, verbose = verbose, GUI = FALSE, n.cores = 1,
+                                    ...))
+      if (GUI) {
+        incProgress(1/(length(levels(as.factor(Occurrences[, which(names(Occurrences) ==
+                                                                     Spcol)]))) + 1), detail = paste(species, " ensemble SDM built"))
+      }
+      if (inherits(enm, "try-error")) {
+        if (verbose) {
+          cat(enm)
+        }
+        enm <- NULL
+      } else {
+        if (tmp && !is.null(enm)) {
+          enm@projection <- writeRaster(enm@projection[[1]], paste0(tmppath,
+                                                                    "/.enms/proba", enm.name), overwrite = TRUE)
+          enm@binary <- writeRaster(enm@binary[[1]], paste0(tmppath,
+                                                            "/.enms/bin", enm.name), overwrite = TRUE)
+          enm@uncertainty <- writeRaster(enm@uncertainty, paste0(tmppath,
+                                                                 "/.enms/uncert", enm.name), overwrite = TRUE)
+        }
+        if (verbose) {
+          cat("\n\n")
+        }
+      }
+      return(enm)
+    })
+    if (verbose) {
+      cat("Closing clusters \n")
+    }
     parallel::stopCluster(cl)
 
   } else {
-    enms = lapply(species,
-                  function(species){
-                    enm.name = species
-                    Spoccurrences = subset(Occurrences, Occurrences[which(names(Occurrences) == Spcol)] == species)
-                    if(verbose){cat('Ensemble modelling :', enm.name, '\n\n')}
-                    enm = try(ensemble_modelling(algorithms, Spoccurrences, Env,
-                                                 Xcol, Ycol, Pcol, rep = rep, name = enm.name, save = F, path = path,
-                                                 PA = PA, cv = cv, cv.param = cv.param, thresh = thresh, metric = metric,
-                                                 axes.metric = axes.metric, uncertainty = uncertainty, tmp = tmp,
-                                                 ensemble.metric = ensemble.metric, ensemble.thresh = ensemble.thresh,
-                                                 weight = weight, verbose = verbose, GUI = F, ...))
-                    if(GUI) {incProgress(1/(length(levels(as.factor(Occurrences[,which(names(Occurrences) == Spcol)])))+1),
-                                         detail = paste(species,' ensemble SDM built'))}
-                    if (inherits(enm, "try-error")) {
-                      if(verbose){cat(enm)}
-                      enm = NULL
-                    } else {
-                      if (tmp && !is.null(enm)) {
-                        enm@projection = writeRaster(enm@projection[[1]], paste0(path, '/.enms/proba',enm.name), overwrite = T)
-                        enm@uncertainty = writeRaster(enm@uncertainty, paste0(path, '/.enms/uncert',enm.name), overwrite = T)
-                      }
-                      if(verbose){cat('\n\n')}
-                    }
-                    return(enm)
-                  }
-    )
+    enms <- lapply(species, function(species) {
+      enm.name <- species
+      Spoccurrences <- subset(Occurrences, Occurrences[which(names(Occurrences) ==
+                                                               Spcol)] == species)
+      if (verbose) {
+        cat("Ensemble modelling :", enm.name, "\n\n")
+      }
+      enm <- try(ensemble_modelling(algorithms, Spoccurrences, Env, Xcol,
+                                    Ycol, Pcol, rep = rep, name = enm.name, save = FALSE, path = path,
+                                    PA = PA, cv = cv, cv.param = cv.param, thresh = thresh, metric = metric,
+                                    axes.metric = axes.metric, uncertainty = uncertainty, tmp = tmp,
+                                    ensemble.metric = ensemble.metric, ensemble.thresh = ensemble.thresh,
+                                    weight = weight, verbose = verbose, GUI = FALSE, ...))
+      if (GUI) {
+        incProgress(1/(length(levels(as.factor(Occurrences[, which(names(Occurrences) ==
+                                                                     Spcol)]))) + 1), detail = paste(species, " ensemble SDM built"))
+      }
+      if (inherits(enm, "try-error")) {
+        if (verbose) {
+          cat(enm)
+        }
+        enm <- NULL
+      } else {
+        if (tmp && !is.null(enm)) {
+          enm@projection <- writeRaster(enm@projection[[1]], paste0(tmppath,
+                                                                    "/.enms/proba", enm.name), overwrite = TRUE)
+          enm@uncertainty <- writeRaster(enm@uncertainty, paste0(tmppath,
+                                                                 "/.enms/uncert", enm.name), overwrite = TRUE)
+        }
+        if (verbose) {
+          cat("\n\n")
+        }
+      }
+      return(enm)
+    })
   }
 
-  enms = enms[!sapply(enms,is.null)]
+  enms <- enms[!sapply(enms, is.null)]
 
   # Species stacking
   if (length(enms) < 2) {
-    if(verbose){stop('You have less than two remaining specie ensemble models, maybe you should try an easier thresholding ?')} else {return(NULL)}
+    if (verbose) {
+      stop("You have less than two remaining specie ensemble models, maybe you should try an easier thresholding ?")
+    } else {
+      return(NULL)
+    }
   } else {
-    if(verbose){cat('#### Species stacking with ensemble models ##### \n\n')}
-    if (!is.null(name)) {enms['name'] = name}
-    enms['method'] = method
-    enms['rep.B'] = rep.B
-    if (!is.null(range)) {enms['range'] = range}
-    enms$endemism = endemism
-    stack = do.call(stacking, enms)
+    if (verbose) {
+      cat("#### Species stacking with ensemble models ##### \n\n")
+    }
+    if (!is.null(name)) {
+      enms["name"] <- name
+    }
+    enms["method"] <- method
+    enms["rep.B"] <- rep.B
+    if (method %in% c("PR", "TR", "CB")) {
+      enms["Env"] <- Env
+    }
+    if (!is.null(range)) {
+      enms["range"] <- range
+    }
+    enms$endemism <- endemism
+    enms["verbose"] <- verbose
+    stack <- do.call(stacking, enms)
   }
 
-  if(!is.null(stack)) {
+  if (!is.null(stack)) {
     # Paremeters
-    stack@parameters$sp.nb.origin = length(levels(as.factor(Occurrences[,which(names(Occurrences) == Spcol)])))
-    if(GUI) {incProgress(1/(length(levels(as.factor(Occurrences[,which(names(Occurrences)==Spcol)])))+1), detail = 'SSDM built')}
+    stack@parameters$sp.nb.origin <- length(levels(as.factor(Occurrences[,
+                                                                         which(names(Occurrences) == Spcol)])))
+    if (GUI) {
+      incProgress(1/(length(levels(as.factor(Occurrences[, which(names(Occurrences) ==
+                                                                   Spcol)]))) + 1), detail = "SSDM built")
+    }
 
     # Saving
-    if(save) {
-      if(verbose){cat('#### Saving ##### \n\n')}
-      if (!is.null(name)) {save.stack(stack, name = name, path = path)}
-      else {save.stack(stack, path = path)}
+    if (save) {
+      if (verbose) {
+        cat("#### Saving ##### \n\n")
+      }
+      if (!is.null(name)) {
+        save.stack(stack, name = name, path = path)
+      } else {
+        save.stack(stack, path = path)
+      }
     }
   }
   return(stack)
