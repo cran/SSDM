@@ -1,7 +1,7 @@
 Package: SSDM
 Type: Package
 Title: Stacked Species Distribution Modelling
-Version: 0.2.1
+Version: 0.2.2
 Author: Sylvain Schmitt, Robin Pouteau, Dimitri Justeau, Philippe Birnbaum
 Maintainer: Sylvain Schmitt <sylvain.schmitt@agroparistech.fr>
 URL: https://github.com/sylvainschmitt/SSDM
@@ -35,6 +35,6 @@ Collate: 'SDM.R' 'Algorithm.SDM.R' 'Ensemble.SDM.R' 'Env.R'
 Suggests: testthat
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-03-22 14:07:02 UTC; sylvain
+Packaged: 2017-03-22 19:14:02 UTC; sylvain
 Repository: CRAN
-Date/Publication: 2017-03-22 14:26:08 UTC
+Date/Publication: 2017-03-22 22:21:55 UTC

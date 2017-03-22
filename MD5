@@ -1,7 +1,7 @@
-d6884b28c1c5a5050891980c486c0069 *DESCRIPTION
+2a86dff5a55283088d1b900a74953bde *DESCRIPTION
 7c4cd6e88503942dd624983276ada27d *LICENSE
 ed4ce46a8917255e0b7424f27dba8a9e *NAMESPACE
-8e324c3ebebd48f8054d39287dc1e80d *NEWS.md
+3c407acae1d4fd749cd8f43dc49c9be3 *NEWS.md
 018aa514fbb17c76f1e3ca4343b6c208 *R/Algorithm.SDM.R
 2458b630c829a9f01e5bd2ba2406ec3d *R/Ensemble.SDM.R
 e9542f7a0d06c4ccf39ebf104d615d60 *R/Env.R
@@ -18,7 +18,7 @@ ef3e212d8a5def988524d0b4219f05c2 *R/evaluate.R
 f7a0b330ef9df3f6a41e05c2247e67c9 *R/evaluate.axes.R
 98a8532198f3d4c109ba415ca6652830 *R/get_PA.R
 1314fdda6c3e18607a0d483b2aad3f14 *R/get_model.R
-3824b6c4416cd2bcbe65f26fa5f8e202 *R/gui.R
+9f545fd03da04da94fa32f91fbafcaae *R/gui.R
 acecd36bc100c19b6c4499503d850427 *R/load_model.R
 7e00fc408e5d1e1dd2c6c4eeb71da971 *R/load_occ.R
 577a25a34b57899cad39429d5860a9b5 *R/load_var.R
@@ -31,7 +31,7 @@ eec7c77c161891e8536520ad8df9c765 *R/plot.model.R
 b08973aed9bed9d0dd4bf13354f2a448 *R/stacking.R
 8c275a6e09eac8a8309df328bf36c05a *R/update.stack.R
 545cda2f4845a6b352e776cf075da4a2 *R/zzz.R
-2483a5a2187a18cba5f4581dc514fd98 *README.md
+1ebc1feb0a488a8bba34ad2540634d5e *README.md
 27aa19d87e850c10cc3828c08aa96435 *data/Env.rda
 fb02d8f1f0c26c3aed9708fe5aeb1b28 *data/Occurrences.rda
 69b77716980cdeb3b8b98773c083e8be *inst/extdata/Occurences.txt
@@ -39,7 +39,7 @@ fb02d8f1f0c26c3aed9708fe5aeb1b28 *data/Occurrences.rda
 8a3076f3e126aff41dffb9ef053ec386 *inst/extdata/SUBSTRATE.tif
 20d829148075e0502cbba2b442832a0f *inst/extdata/TEMPERATURE.tif
 4c00e58b7ac063220b9c1d041734342a *inst/shiny/gui/server.R
-0413fa5aba93cd25ca624489286722e8 *inst/shiny/gui/ui.R
+04a8293026b4c7f7d306d06b407d7c3e *inst/shiny/gui/ui.R
 401bb2684babc3a8e4f8983d2c7ea180 *man/Algorithm.SDM-class.Rd
 8c79c216a211db80caab44f3f332d7a6 *man/Ensemble.SDM-class.Rd
 83277d52e7dcbfa4e8c803c7478eef32 *man/Env.Rd
