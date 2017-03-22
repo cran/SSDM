@@ -24,11 +24,15 @@
 gui <- function (port = getOption("shiny.port"),
                  host = getOption("shiny.host", "127.0.0.1"),
                  working.directory = getwd()) {
+
   appDir <- system.file("shiny", "gui", package = "SSDM")
   if (appDir == "") {
     stop("Could not find shiny directory. Try re-installing `SSDM`.", call. = FALSE)
   }
-  assign("working.directory", working.directory, envir = .PkgEnv)
-  shiny::runApp(appDir, display.mode = "normal", port = port, host = host)
-  rm(working.directory, envir = .PkgEnv)
+
+  ui <- source(file.path(appDir, 'ui.R'))
+  serverWD <- source(file.path(appDir, 'server.R'))
+  shiny::runApp(shinyApp(ui = ui, server = serverWD(working.directory)),
+                         display.mode = "normal", port = port, host = host)
+  rm(ui, serverWD, envir = .GlobalEnv)
 }
