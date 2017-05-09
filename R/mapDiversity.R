@@ -6,13 +6,13 @@ NULL
 
 #' Map Diversity
 #'
-#' Methods for Stacked.SDM or SSDM to map diversity and communties composition.
+#' Methods for Stacked.SDM or SSDM to map diversity and communities composition.
 #'
 #'@param obj Stacked.SDM. SSDM to map diversity with.
 #'@param method character. Define the method used to create the local species
 #'  richness map (see details below).
 #'@param rep.B integer. If the method used to create the local species richness
-#'  is the random bernoulli (\strong{Bernoulli}), rep.B parameter defines the number of
+#'  is the random Bernoulli (\strong{Bernoulli}), rep.B parameter defines the number of
 #'  repetitions used to create binary maps for each species.
 #'@param Env raster object. Stacked raster object of environmental variables
 #'  (can be processed first by \code{\link{load_var}}). Needed only for stacking
@@ -22,7 +22,7 @@ NULL
 #'@param ... other arguments pass to the method.
 #'
 #'@return a list with a diversity map and eventually ESDMs for stacking method
-#'  using probability ranking from richness (\strong{PPR})
+#'  using probability ranking from richness (\strong{PPR}).
 #'
 #'@details \strong{Methods:} Choice of the method used to compute the local
 #'  species richness map (see Calabrez et al. (2014) and D'Amen et al (2015) for
@@ -30,7 +30,7 @@ NULL
 #'  probabilities of habitat suitability maps}\item{Bernoulli}{draw repeatedly
 #'  from a Bernoulli distribution}\item{bSSDM}{sum the binary map obtained with
 #'  the thresholding (depending on the metric of the
-#'  ESDM).}\item{MaximumLikelyhood}{adjust species richness of the model by
+#'  ESDM).}\item{MaximumLikelihood}{adjust species richness of the model by
 #'  linear regression}\item{PRR.MEM}{model richness with a macroecological model
 #'  (MEM) and adjust each ESDM binary map by ranking habitat suitability and
 #'  keeping as much as predicted richness of the MEM}\item{PRR.pSSDM}{model
@@ -126,10 +126,10 @@ setMethod("mapDiversity", "Stacked.SDM", function(obj, method, rep.B = 1000,
     diversity.map <- sum(diversity.map)/length(enms)/rep.B
   }
 
-  if (method == "MaximumLikelyhood") {
-    # Maximum likelyhood (Calabrese et al, 2014)
+  if (method == "MaximumLikelihood") {
+    # Maximum likelihood (Calabrese et al, 2014)
     if (verbose)
-      cat("\n Local species richness computed by maximum likelyhood adjustment. \n")
+      cat("\n Local species richness computed by maximum likelihood adjustment. \n")
     diversity.map <- mapDiversity(obj, method = 'bSSDM',
                                   verbose = FALSE)$diversity.map
     Richness <- .richness(obj)
