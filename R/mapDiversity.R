@@ -25,7 +25,7 @@ NULL
 #'  using probability ranking from richness (\strong{PPR}).
 #'
 #'@details \strong{Methods:} Choice of the method used to compute the local
-#'  species richness map (see Calabrez et al. (2014) and D'Amen et al (2015) for
+#'  species richness map (see Calabrese et al. (2014) and D'Amen et al (2015) for
 #'  more informations, see reference below): \describe{\item{pSSDM}{sum
 #'  probabilities of habitat suitability maps}\item{Bernoulli}{draw repeatedly
 #'  from a Bernoulli distribution}\item{bSSDM}{sum the binary map obtained with
@@ -182,9 +182,14 @@ setMethod("mapDiversity", "Stacked.SDM", function(obj, method, rep.B = 1000,
 
 .MEM <- function(obj, Env){
   occ <- data.frame(rasterToPoints(.richness(obj), function(x) x > 0))
-  ensemble_modelling(algorithms = unlist(
+  maxOcc <- max(occ$layer) # Reucing occ for algorithms
+  occ$layer <- occ$layer/max(maxOcc)
+  algo <- unlist(
     strsplit(obj@enms[[1]]@parameters$algorithms,
-             ".", fixed = TRUE))[-1],
+             ".", fixed = TRUE))[-1]
+  if("MAXENT" %in% algo)
+    algo <- algo[-which(algo == "MAXENT")]
+  MEM <- ensemble_modelling(algorithms = algo,
     Occurrences = occ, Env = Env, Xcol = "x",
     Ycol = "y", Pcol = "layer", rep = obj@enms[[1]]@parameters$rep,
     name = "MEM", cv = obj@enms[[1]]@parameters$cv,
@@ -202,6 +207,8 @@ setMethod("mapDiversity", "Stacked.SDM", function(obj, method, rep.B = 1000,
     uncertainty = FALSE,
     weight = as.logical(obj@enms[[1]]@parameters$weight),
     verbose = FALSE)
+  MEM@projection <- MEM@projection*maxOcc
+  return(MEM)
 }
 
 .PRR <- function(obj, Richness){

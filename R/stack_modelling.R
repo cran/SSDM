@@ -129,7 +129,7 @@ NULL
 #'  \strong{Kappa}, \strong{sensitivity}, \strong{specificity}, and
 #'  \strong{prop.correct} (proportion of correctly predicted occurrences).}
 #'  \item{method}{Choice of the method used to compute the local species
-#'  richness map (see Calabrez et al. (2014) and D'Amen et al (2015) for more
+#'  richness map (see Calabrese et al. (2014) and D'Amen et al (2015) for more
 #'  informations, see reference below): \strong{pSSDM} sum probabilities of
 #'  habitat suitability maps, \strong{Bernoulli} drawing repeatedly from a
 #'  Bernoulli distribution, \strong{bSSDM} sum the binary map obtained with the
@@ -431,7 +431,7 @@ stack_modelling <- function(algorithms,
   # Species stacking
   if (length(enms) < 2) {
     if (verbose) {
-      stop("You have less than two remaining specie ensemble models, maybe you should try an easier thresholding ?")
+      stop("Less than two species models were retained, you should lower the ensemble threshold value (ensemble.thresh parameter).")
     } else {
       return(NULL)
     }
@@ -444,7 +444,7 @@ stack_modelling <- function(algorithms,
     }
     enms["method"] <- method
     enms["rep.B"] <- rep.B
-    if (method %in% c("PR", "TR", "CB")) {
+    if (method %in% c("PRR.MEM", "PRR.pSSDM")) {
       enms["Env"] <- Env
     }
     if (!is.null(range)) {

@@ -1,16 +1,63 @@
 NEWS
 ================
 
-TO DO
-=====
+SSDM 0.2.4
+===============
 
--   possibility to add external richness data
--   add evaluation for MEMs
--   add ensemble method for MEMs
--   implement trait range stacking method
--   implement checkerboard stacking method
--   add finer tests
--   document all S4 class and methods
+- CRAN v0.2.4 submission
+
+SSDM 0.2.3.9011
+===============
+
+- Fixed dependency compatibility with raster 2.9-5
+- Changed maintainter mail adress (permanent adress)
+- Removed rgdal from vignette builder as asked by mail
+
+SSDM 0.2.3.9010
+===============
+
+- solved compatibility issue with new raster version
+
+SSDM 0.2.3.9009
+===============
+
+- evaluation unactivation with `eval=F` in stacking function for Robin issue
+
+SSDM 0.2.3.9008
+===============
+
+- issue #32 fixed related to `shinyFiles` version 0.7.0
+
+SSDM 0.2.3.9007
+===============
+
+-   fixed GBM and removed MAXENT for MEM issue \#24 from @BoiMau
+
+SSDM 0.2.3.9006
+===============
+
+-   fixed second issue \#24 from @BoiMau
+
+SSDM 0.2.3.9005
+===============
+
+-   fixed issue \#24 from @BoiMau
+
+SSDM 0.2.3.9004
+===============
+
+-   fixed issue \#20 from @Rekyt
+
+SSDM 0.2.3.9003
+===============
+
+-   fixed issue \#22 from @Rekyt
+
+SSDM 0.2.3.9002
+===============
+
+-   `rmarkdown` added to VignetteBuilder field in DESCRIPTION
+-   CTATION file added following article publication
 
 SSDM 0.2.3.9001
 ===============

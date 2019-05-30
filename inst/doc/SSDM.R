@@ -17,11 +17,11 @@ plot(SDM@projection, main = 'SDM\nfor Cryptocarya elliptica\nwith GLM algorithm'
 ## ----ESDM----------------------------------------------------------------
 ESDM <- ensemble_modelling(c('CTA', 'MARS'), subset(Occurrences, Occurrences$SPECIES == 'elliptica'),
                            Env, rep = 1, Xcol = 'LONGITUDE', Ycol = 'LATITUDE',
-                          ensemble.thresh = c(0.6), verbose = FALSE)
+                          ensemble.thresh = 0, verbose = FALSE)
 plot(ESDM@projection, main = 'ESDM\nfor Cryptocarya elliptica\nwith CTA and MARS algorithms')
 
 ## ----SSDM----------------------------------------------------------------
-SSDM <- stack_modelling(c('CTA', 'SVM'), Occurrences, Env, rep = 1,
+SSDM <- stack_modelling(c('CTA', 'SVM'), Occurrences, Env, rep = 1, ensemble.thresh = 0,
                        Xcol = 'LONGITUDE', Ycol = 'LATITUDE',
                        Spcol = 'SPECIES', method = "pSSDM", verbose = FALSE)
 plot(SSDM@diversity.map, main = 'SSDM\nfor Cryptocarya genus\nwith CTA and SVM algorithms')

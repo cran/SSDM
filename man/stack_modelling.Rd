@@ -9,10 +9,10 @@ stack_modelling(algorithms, Occurrences, Env, Xcol = "Longitude",
   name = NULL, save = FALSE, path = getwd(), PA = NULL,
   cv = "holdout", cv.param = c(0.7, 1), thresh = 1001,
   axes.metric = "Pearson", uncertainty = TRUE, tmp = FALSE,
-  ensemble.metric = c("AUC"), ensemble.thresh = c(0.75), weight = TRUE,
-  method = "pSSDM", metric = "SES", rep.B = 1000, range = NULL,
-  endemism = c("WEI", "Binary"), verbose = TRUE, GUI = FALSE, cores = 1,
-  ...)
+  ensemble.metric = c("AUC"), ensemble.thresh = c(0.75),
+  weight = TRUE, method = "pSSDM", metric = "SES", rep.B = 1000,
+  range = NULL, endemism = c("WEI", "Binary"), verbose = TRUE,
+  GUI = FALSE, cores = 1, ...)
 }
 \arguments{
 \item{algorithms}{character. Choice of the algorithm(s) to be run (see details
@@ -170,7 +170,7 @@ variable importance), and a list of ensemble SDMs for each species (see
  \strong{Kappa}, \strong{sensitivity}, \strong{specificity}, and
  \strong{prop.correct} (proportion of correctly predicted occurrences).}
  \item{method}{Choice of the method used to compute the local species
- richness map (see Calabrez et al. (2014) and D'Amen et al (2015) for more
+ richness map (see Calabrese et al. (2014) and D'Amen et al (2015) for more
  informations, see reference below): \strong{pSSDM} sum probabilities of
  habitat suitability maps, \strong{Bernoulli} drawing repeatedly from a
  Bernoulli distribution, \strong{bSSDM} sum the binary map obtained with the
