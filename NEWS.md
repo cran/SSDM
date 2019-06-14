@@ -1,10 +1,26 @@
 NEWS
 ================
 
-SSDM 0.2.4
+SSDM 0.2.6
 ===============
 
-- CRAN v0.2.4 submission
+- CRAN v0.2.6 submission
+
+SSDM 0.2.5.9001
+===============
+
+- #36 and #49 fixed
+
+SSDM 0.2.5.9000
+===============
+
+- #46 fixed
+- Fixed division by zero bug (NA propagation) in `project`
+
+SSDM 0.2.5
+===============
+
+- CRAN v0.2.5 submission
 
 SSDM 0.2.3.9011
 ===============
