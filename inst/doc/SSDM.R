@@ -1,5 +1,6 @@
 ## ----Environmental variables---------------------------------------------
 library(SSDM)
+library(raster)
 Env <- load_var(system.file('extdata',  package = 'SSDM'), categorical = 'SUBSTRATE', verbose = FALSE)
 Env
 
@@ -40,4 +41,8 @@ plot(SSDM@endemism.map, main = 'Endemism map\nfor Cryptocarya genus\nwith CTA an
 
 ## ----plot----------------------------------------------------------------
 # plot(SSDM)
+
+## ----project-------------------------------------------------------------
+Env_new <- stack(Env[[1]]-0.3,Env[[2]],Env[[3]]+0.2)
+SDM_projection <- project(SDM,Env_new)
 
