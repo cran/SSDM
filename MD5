@@ -1,7 +1,7 @@
-80602106bb6a04d18381f54bedce9e5b *DESCRIPTION
+1354368837fc8bd5792a20883f7eaf7f *DESCRIPTION
 7c4cd6e88503942dd624983276ada27d *LICENSE
 74238359c7c78470fdf05091ce7410e8 *NAMESPACE
-97f0fd773e6835333dcc1136db45482e *NEWS.md
+18e910064a6059b5a7999785b7227271 *NEWS.md
 018aa514fbb17c76f1e3ca4343b6c208 *R/Algorithm.SDM.R
 45399684b9dbf66f6e7132312edd4c70 *R/Ensemble.SDM.R
 062f3d356cfd4ceee69f8852795bfd02 *R/Env.R
@@ -21,7 +21,7 @@ b9b2d4dc658f7972af7fd996de6a2dba *R/evaluate.R
 c78c01e194347c2a02f223a17f2bbfb6 *R/get_model.R
 4af47ba27bb2e88f9e55f333dc4d291f *R/gui.R
 5f7d4abf0f0de5d2c0a84fdb89e7c603 *R/load_model.R
-f7b19b1a397801e1e295d8c958c22759 *R/load_occ.R
+57662a220dc12561dfaacdc5447dcb17 *R/load_occ.R
 b15e6821692a659fa6026d52b0f6f3f5 *R/load_var.R
 85b7f23651405a9d95695e3644bebaf2 *R/mapDiversity.R
 f34f565abc94f696a8a5608bd3c40956 *R/modelling.R
@@ -39,10 +39,10 @@ a6f9b1b57d9d540ad14976877ac02539 *build/vignette.rds
 fb02d8f1f0c26c3aed9708fe5aeb1b28 *data/Occurrences.rda
 303586f891a233c447d73995285dbdd5 *inst/CITATION
 dc057e962f8ae147f87a8ef800bd5242 *inst/doc/GUI.Rmd
-3e2c67a3a30641df556900cf0cf671f5 *inst/doc/GUI.html
+afc43d2c6e37b46319e0e9af46fd062f *inst/doc/GUI.html
 4f75b965c0427c4191fbfb99dcc8c5bb *inst/doc/SSDM.R
 df284e0db3fe2a05fd51b0f2a390bfbe *inst/doc/SSDM.Rmd
-f868ec94126a3e0ea9c2c844826e0d9a *inst/doc/SSDM.html
+e56f23871715486b56eb923cb6833c73 *inst/doc/SSDM.html
 69b77716980cdeb3b8b98773c083e8be *inst/extdata/Occurrences.csv
 82c8e7be70796cc25ecfd5c7f6c9a108 *inst/extdata/RAINFALL.tif
 8a3076f3e126aff41dffb9ef053ec386 *inst/extdata/SUBSTRATE.tif
