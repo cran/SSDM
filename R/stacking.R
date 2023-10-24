@@ -1,5 +1,5 @@
 #' @include Ensemble.SDM.R checkargs.R
-#' @importFrom sp Polygon Polygons SpatialPolygons SpatialPoints bbox
+#' @importFrom sf st_as_sf st_buffer
 #' @importFrom raster raster stack reclassify mask calc overlay values rasterize rasterToPoints values<-
 #' @importFrom stats lm
 NULL
@@ -32,8 +32,10 @@ NULL
 #'  range restriction will be applied.
 #'@param endemism character. Define the method used to create an endemism map
 #'  (see details below).
-#'@param eval logical. If set to true, disable stack evaluation.
-#'@param verbose logical. If set to true, allows the function to print text in
+#'@param eval logical. If set to FALSE, disable stack evaluation.
+#' @param uncertainty logical. If set to TRUE, generates an uncertainty map and
+#'  an algorithm correlation matrix.
+#'@param verbose logical. If set to TRUE, allows the function to print text in
 #'  the console.
 #'@param GUI logical. Don't take that argument into account (parameter for the
 #'  user interface).
@@ -98,7 +100,7 @@ NULL
 #'  J.M. Calabrese, G. Certain, C.  Kraan, & C.F. Dormann (2014) "Stacking
 #'  species distribution  models  and  adjusting  bias  by linking them to
 #'  macroecological models." \emph{Global Ecology and Biogeography} 23:99-112
-#'  \url{http://portal.uni-freiburg.de/biometrie/mitarbeiter/dormann/calabrese2013globalecolbiogeogr.pdf}
+#'  \url{https://onlinelibrary.wiley.com/doi/full/10.1111/geb.12102}
 #'
 #'  M. D. Crisp, S. Laffan, H. P. Linder & A. Monro (2001) "Endemism in the
 #'  Australian flora"  \emph{Journal of Biogeography} 28:183-198
@@ -112,14 +114,14 @@ NULL
 #'@rdname stacking
 #'@export
 setGeneric('stacking', function(esdm, ..., name = NULL, method = 'pSSDM', rep.B = 1000,
-                                Env = NULL, range = NULL, endemism = c('WEI','Binary'), eval = TRUE,
+                                Env = NULL, range = NULL, endemism = c('WEI','Binary'), eval = TRUE, uncertainty=TRUE,
                                 verbose = TRUE, GUI = FALSE) {return(standardGeneric('stacking'))})
 
 #' @rdname stacking
 #' @export
 setMethod('stacking', 'Ensemble.SDM', function(esdm, ..., name = NULL, method = 'pSSDM', rep.B = 1000,
-                                               Env = NULL, range = NULL, endemism = c('WEI','Binary'),
-                                               eval = TRUE, verbose = TRUE, GUI = FALSE) {
+                                               Env = NULL, range = NULL, endemism = c('WEI','Binary'), eval = TRUE, uncertainty=TRUE,
+                                               verbose = TRUE, GUI = FALSE) {
   # Check arguments
   .checkargs(esdm = esdm, name = name, method = method, rep.B = rep.B, range = range,
              endemism = endemism, eval = eval, verbose = verbose, GUI = GUI)
@@ -142,7 +144,7 @@ setMethod('stacking', 'Ensemble.SDM', function(esdm, ..., name = NULL, method = 
   }
   stack <- Stacked.SDM(diversity.map = reclassify(esdm@projection[[1]], c(-Inf,Inf, 0)),
                        endemism.map = reclassify(esdm@projection[[1]], c(-Inf, Inf, 0)),
-                       uncertainty = reclassify(esdm@uncertainty, c(-Inf, Inf, NA)),
+                       uncertainty = if(!uncertainty){raster()}else{reclassify(esdm@uncertainty, c(-Inf, Inf, NA))},
                        parameters = esdm@parameters)
 
   # ESDMs
@@ -174,21 +176,9 @@ setMethod('stacking', 'Ensemble.SDM', function(esdm, ..., name = NULL, method = 
                                                           1]))/sum(esdms[[j]]@algorithm.evaluation$kept.model)
       occ <- esdms[[j]]@data[1:nbocc, ]
       occ <- occ[which(occ$Presence == 1), 1:2]
-      circles <- list()
-      for (i in seq_len(length(occ[, 1]))) {
-        x <- occ$X[i]
-        y <- occ$Y[i]
-        pts <- seq(0, 2 * pi, length.out = 100)
-        # xy = cbind(x + range/60 * sin(pts), y + range/60 * cos(pts))
-        res <- res(stack@endemism.map)[1]
-        xy <- cbind(x + range * res * sin(pts), y + range * res * cos(pts))
-        circle <- Polygon(xy)
-        circles[i] <- circle
-      }
-      sc <- SpatialPolygons(list(Polygons(circles, "Circles")))
-      esdms[[j]]@projection <- mask(esdms[[j]]@projection, sc, updatevalue = 0)
-      # thresh = esdms[[j]]@evaluation$threshold esdms[[j]]@projection =
-      # reclassify(esdms[[j]]@projection, c(-Inf,thresh,0, thresh,Inf,1))
+      circles <- st_as_sf(occ, coords = c("X", "Y"))
+      circles <- st_buffer(circles, range * res)
+      esdms[[j]]@projection <- mask(esdms[[j]]@projection, circles, updatevalue = 0)
     }
   }
   if (verbose) {
@@ -207,38 +197,40 @@ setMethod('stacking', 'Ensemble.SDM', function(esdm, ..., name = NULL, method = 
     cat(" done. \n")
 
   # uncertainty map
-  if (verbose) {
-    cat("   uncertainty mapping...")
-  }
-  uncertainities <- stack()
-  for (i in seq_len(length(esdms))) {
-    a <- try(esdms[[i]]@uncertainty)
-    if (inherits(a, "try-error")) {
-      if (verbose) {
-        cat("Ensemble model", esdms[[i]]@name, "uncertainty map not computed")
-      }
-    } else {
-      b <- try(stack(uncertainities, a))
-      if (inherits(b, "try-error")) {
+  if(uncertainty){
+    if (verbose) {
+      cat("   uncertainty mapping...")
+    }
+    uncertainties <- stack()
+    for (i in seq_len(length(esdms))) {
+      a <- try(esdms[[i]]@uncertainty)
+      if (inherits(a, "try-error")) {
         if (verbose) {
-          cat("Ensemble model", esdms[[i]]@name, ":", b)
+          cat("Ensemble model", esdms[[i]]@name, "uncertainty map not computed")
         }
       } else {
-        uncertainities <- b
+        b <- try(stack(uncertainties, a))
+        if (inherits(b, "try-error")) {
+          if (verbose) {
+            cat("Ensemble model", esdms[[i]]@name, ":", b)
+          }
+        } else {
+          uncertainties <- b
+        }
       }
     }
-  }
-  a <- try(calc(uncertainities, mean))
-  if (inherits(a, "try-error")) {
-    if (verbose) {
-      cat("No uncertainty map to do uncertainty mapping")
+    a <- try(calc(uncertainties, mean))
+    if (inherits(a, "try-error")) {
+      if (verbose) {
+        cat("No uncertainty map to do uncertainty mapping")
+      }
+    } else {
+      stack@uncertainty <- a
+      names(stack@uncertainty) <- "uncertainty"
     }
-  } else {
-    stack@uncertainty <- a
-    names(stack@uncertainty) <- "uncertainty"
-  }
-  if (verbose) {
-    cat(" done. \n")
+    if (verbose) {
+      cat(" done. \n")
+    }
   }
 
   # endemism map
@@ -246,7 +238,7 @@ setMethod('stacking', 'Ensemble.SDM', function(esdm, ..., name = NULL, method = 
     cat("   endemism mapping...")
   }
   if (is.null(endemism)) {
-    "unactivated"
+    "deactivated"
   } else {
     for (i in seq_len(length(esdms))) {
       if (endemism[2] == "NbOcc") {
@@ -277,7 +269,7 @@ setMethod('stacking', 'Ensemble.SDM', function(esdm, ..., name = NULL, method = 
 
   # variable Importance
   if (verbose) {
-    cat("   comparing variable importnace...")
+    cat("   comparing variable importance...")
   }
   stack@variable.importance <- esdm@variable.importance
   for (i in 2:length(esdms)) {
@@ -363,18 +355,19 @@ setMethod('stacking', 'Ensemble.SDM', function(esdm, ..., name = NULL, method = 
   for (i in 2:length(esdms)) {
     stack@algorithm.evaluation <- rbind(stack@algorithm.evaluation, esdms[[i]]@algorithm.evaluation)
   }
-  stack@algorithm.evaluation$algo <- "algo"
-  for (i in seq_len(length(row.names(stack@algorithm.evaluation)))) {
-    stack@algorithm.evaluation$algo[i] <- strsplit(row.names(stack@algorithm.evaluation),
-                                                   ".", fixed = TRUE)[[i]][2]
-  }
-  stack@algorithm.evaluation <- aggregate.data.frame(stack@algorithm.evaluation[-9],
+  # stack@algorithm.evaluation$algo <- "algo"
+  stack@algorithm.evaluation$algo <- unlist(regmatches(row.names(stack@algorithm.evaluation), gregexpr("ANN|CTA|GAM|GBM|GLM|MARS|MAXENT|RF|SVM", row.names(stack@algorithm.evaluation))))
+  # for (i in seq_len(length(row.names(stack@algorithm.evaluation)))) {
+  #   stack@algorithm.evaluation$algo[i] <- strsplit(row.names(stack@algorithm.evaluation),
+  #                                                  ".", fixed = TRUE)[[i]][2]
+  # }
+  stack@algorithm.evaluation <- aggregate.data.frame(stack@algorithm.evaluation[-which(names(stack@algorithm.evaluation) ==
+                                                                                         "algo")],
                                                      by = list(stack@algorithm.evaluation[, which(names(stack@algorithm.evaluation) ==
                                                                                                     "algo")]), FUN = mean)
   row.names(stack@algorithm.evaluation) <- stack@algorithm.evaluation$Group.1
   stack@algorithm.evaluation <- stack@algorithm.evaluation[-1]
-  stack@algorithm.evaluation <- stack@algorithm.evaluation[-which(names(stack@algorithm.evaluation) ==
-                                                                    "algo")]
+
   if (verbose) {
     cat(" done. \n")
   }
