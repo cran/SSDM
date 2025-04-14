@@ -1,6 +1,11 @@
 NEWS
 ================
 
+SSDM 0.2.10
+===============
+
+bug fixes: noLD fix on test_modelling (https://www.stats.ox.ac.uk/pub/bdr/noLD/SSDM.out)
+
 SSDM 0.2.9
 ===============
 

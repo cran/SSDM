@@ -1,8 +1,26 @@
 Package: SSDM
 Type: Package
 Title: Stacked Species Distribution Modelling
-Version: 0.2.9
-Author: Sylvain Schmitt, Robin Pouteau, Dimitri Justeau, Florian de Boissieu, Lukas Baumbach, Philippe Birnbaum
+Version: 0.2.10
+Authors@R: c(person(given = "Sylvain",
+                      family = "Schmitt",
+                      role = c("aut", "cre"),
+                      email = "sylvain.m.schmitt@gmail.com"),
+               person(given = "Robin",
+                      family = "Pouteau",
+                      role = "aut"),
+               person(given = "Dimitri",
+                      family = "Justeau",
+                      role = "aut"),
+               person(given = "Florian",
+                      family = "de Boissieu",
+                      role = "aut"),
+               person(given = "Lukas",
+                      family = "Baumbach",
+                      role = "aut"),
+               person(given = "Philippe",
+                      family = "Birnbaum",
+                      role = "aut"))
 Maintainer: Sylvain Schmitt <sylvain.m.schmitt@gmail.com>
 URL: https://github.com/sylvainschmitt/SSDM
 BugReports: https://github.com/sylvainschmitt/SSDM/issues
@@ -37,10 +55,16 @@ Collate: 'SDM.R' 'Algorithm.SDM.R' 'Ensemble.SDM.R' 'Env.R'
         'stack_modelling.R' 'stacking.R' 'update.stack.R'
         'utils-pipe.R' 'zzz.R'
 Suggests: testthat, knitr, rmarkdown, shinyFiles
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 VignetteBuilder: knitr, rmarkdown
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2023-10-24 12:04:46 UTC; sschmitt
+Packaged: 2025-04-14 07:31:29 UTC; sschmitt
+Author: Sylvain Schmitt [aut, cre],
+  Robin Pouteau [aut],
+  Dimitri Justeau [aut],
+  Florian de Boissieu [aut],
+  Lukas Baumbach [aut],
+  Philippe Birnbaum [aut]
 Repository: CRAN
-Date/Publication: 2023-10-24 13:40:18 UTC
+Date/Publication: 2025-04-14 10:20:05 UTC

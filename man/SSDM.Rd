@@ -2,6 +2,7 @@
 % Please edit documentation in R/SSDM.R
 \docType{package}
 \name{SSDM}
+\alias{SSDM-package}
 \alias{SSDM}
 \title{SSDM: Stacked species distribution modelling}
 \description{
@@ -52,3 +53,24 @@ classes, and Miscellaneous.
   \item{\code{\link{load.model}}}{Load SDMs}}
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/sylvainschmitt/SSDM}
+  \item Report bugs at \url{https://github.com/sylvainschmitt/SSDM/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Sylvain Schmitt \email{sylvain.m.schmitt@gmail.com}
+
+Authors:
+\itemize{
+  \item Robin Pouteau
+  \item Dimitri Justeau
+  \item Florian de Boissieu
+  \item Lukas Baumbach
+  \item Philippe Birnbaum
+}
+
+}

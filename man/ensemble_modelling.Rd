@@ -341,7 +341,7 @@ M. Barbet-Massin, F. Jiguet, C. H.  Albert, & W. Thuiller (2012)
  C. Liu, P. M. Berry, T. P. Dawson,  R. & G. Pearson (2005) "Selecting
  thresholds of occurrence in the prediction of species distributions."
  \emph{Ecography} 28:85-393
- \url{http://www.researchgate.net/publication/230246974_Selecting_Thresholds_of_Occurrence_in_the_Prediction_of_Species_Distributions}
+ \url{https://www.researchgate.net/publication/230246974_Selecting_Thresholds_of_Occurrence_in_the_Prediction_of_Species_Distributions}
 }
 \seealso{
 \code{\link{modelling}} to build SDMs with a single algorithm,

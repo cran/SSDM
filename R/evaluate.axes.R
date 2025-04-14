@@ -34,6 +34,8 @@ setMethod('evaluate.axes', "Algorithm.SDM", function(obj, cv, cv.param, final.fi
         }
         obj@variable.importance[(i - 3)] <- 1 - c
       }
+
+
     }
   }
 

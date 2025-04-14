@@ -12,7 +12,7 @@
 #' @references R.J. Hijmans, C.H. &  Graham (2006) "The  ability  of climate
 #'   envelope  models  to  predict  the  effect  of  climate  change  on species
 #'   distributions." \emph{Global Change Biology} 12:2272-2281
-#'   \url{http://onlinelibrary.wiley.com/doi/10.1111/j.1365-2486.2006.01256.x/full}
+#'   \url{https://onlinelibrary.wiley.com/doi/full/10.1111/j.1365-2486.2006.01256.x}
 #'
 #'   E. Fritsch (2012) "Les sols. Atlas de la Nouvelle-Caledonie (ed. by J.
 #'   Bonvallot, J.-C. Gay and E. Habert)" \emph{IRD-Congres de la
