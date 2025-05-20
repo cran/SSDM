@@ -1,26 +1,26 @@
 Package: SSDM
 Type: Package
 Title: Stacked Species Distribution Modelling
-Version: 0.2.10
+Version: 0.2.11
 Authors@R: c(person(given = "Sylvain",
-                      family = "Schmitt",
-                      role = c("aut", "cre"),
-                      email = "sylvain.m.schmitt@gmail.com"),
-               person(given = "Robin",
-                      family = "Pouteau",
-                      role = "aut"),
-               person(given = "Dimitri",
-                      family = "Justeau",
-                      role = "aut"),
-               person(given = "Florian",
-                      family = "de Boissieu",
-                      role = "aut"),
-               person(given = "Lukas",
-                      family = "Baumbach",
-                      role = "aut"),
-               person(given = "Philippe",
-                      family = "Birnbaum",
-                      role = "aut"))
+                    family = "Schmitt",
+                    role = c("aut", "cre"),
+                    email = "sylvain.m.schmitt@gmail.com"),
+             person(given = "Robin",
+                    family = "Pouteau",
+                    role = "aut"),
+             person(given = "Dimitri",
+                    family = "Justeau",
+                    role = "aut"),
+             person(given = "Florian",
+                    family = "de Boissieu",
+                    role = "aut"),
+             person(given = "Lukas",
+                    family = "Baumbach",
+                    role = "aut"),
+             person(given = "Philippe",
+                    family = "Birnbaum",
+                    role = "aut"))
 Maintainer: Sylvain Schmitt <sylvain.m.schmitt@gmail.com>
 URL: https://github.com/sylvainschmitt/SSDM
 BugReports: https://github.com/sylvainschmitt/SSDM/issues
@@ -59,7 +59,7 @@ RoxygenNote: 7.3.1
 VignetteBuilder: knitr, rmarkdown
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2025-04-14 07:31:29 UTC; sschmitt
+Packaged: 2025-05-20 08:29:05 UTC; sschmitt
 Author: Sylvain Schmitt [aut, cre],
   Robin Pouteau [aut],
   Dimitri Justeau [aut],
@@ -67,4 +67,4 @@ Author: Sylvain Schmitt [aut, cre],
   Lukas Baumbach [aut],
   Philippe Birnbaum [aut]
 Repository: CRAN
-Date/Publication: 2025-04-14 10:20:05 UTC
+Date/Publication: 2025-05-20 09:00:02 UTC

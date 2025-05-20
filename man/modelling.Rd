@@ -275,7 +275,7 @@ plot(SDM)
 M. Barbet-Massin, F. Jiguet, C. H.  Albert, & W. Thuiller (2012)
  'Selecting pseudo-absences for species distribution models: how, where and
  how many?' \emph{Methods Ecology and Evolution} 3:327-338
- \url{https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2011.00172.x}
+ \url{http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2011.00172.x/full}
 
 
 
@@ -286,7 +286,6 @@ M. Barbet-Massin, F. Jiguet, C. H.  Albert, & W. Thuiller (2012)
  C. Liu, P. M. Berry, T. P. Dawson,  R. & G. Pearson (2005) 'Selecting
  thresholds of occurrence in the prediction of species distributions.'
  \emph{Ecography} 28:85-393
- \url{https://www.researchgate.net/publication/230246974_Selecting_Thresholds_of_Occurrence_in_the_Prediction_of_Species_Distributions}
 }
 \seealso{
 \code{\link{ensemble_modelling}} to build ensemble SDMs,

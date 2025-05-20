@@ -1,10 +1,15 @@
 NEWS
 ================
 
+SSDM 0.2.11
+===============
+
+bug fixes: M1mac fails on test_ensemble
+
 SSDM 0.2.10
 ===============
 
-bug fixes: noLD fix on test_modelling (https://www.stats.ox.ac.uk/pub/bdr/noLD/SSDM.out)
+bug fixes: noLD fails on test_modelling
 
 SSDM 0.2.9
 ===============
